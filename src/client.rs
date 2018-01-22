@@ -3,7 +3,7 @@ use std::io::Read;
 use std::time::Duration;
 
 use reqwest::{self, StatusCode, Method, Url};
-use reqwest::header::Headers;
+use reqwest::header::{Headers, Authorization, Basic};
 use serde_json::{self, Value};
 
 use error::HelpScoutError;
@@ -74,7 +74,11 @@ impl Client {
         loop {
             let url = url.clone();
             let mut headers = Headers::new();
-            headers.set_raw("X-HelpScout-API-Key", self.api_key.clone());
+            let credentials = Basic {
+                username: self.api_key.clone(),
+                password: Some("X".into()),
+            };
+            headers.set(Authorization(credentials));
             let mut res = match params.clone() {
                 Some(p) => self.reqwest.request(method.clone(), url)?.headers(headers).form(&p)?.send()?,
                 None => self.reqwest.request(method.clone(), url)?.headers(headers).send()?,
