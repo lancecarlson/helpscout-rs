@@ -47,20 +47,19 @@ impl Client {
 
     /// Send a `get` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
-    pub fn get(&self, prefix: &str, path: &str, url_params: Option<Vec<(String, String)>>) -> Result<(Status, Value), HelpScoutError> {
-        self.request(Method::Get, self.url(prefix, path, url_params), None)
+    pub fn get(&self, path: &str, url_params: Option<Vec<(String, String)>>) -> Result<Value, HelpScoutError> {
+        self.request(Method::Get, self.url(path, url_params), None)
     }
 
     /// Send a `post` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
-    pub fn post(&self, prefix: &str, path: &str, url_params: Option<Vec<(String, String)>>, post_params: Option<Vec<(String, String)>>) -> Result<(Status, Value), HelpScoutError> {
-        self.request(Method::Post, self.url(prefix, path, url_params), post_params)
+    pub fn post(&self, path: &str, url_params: Option<Vec<(String, String)>>, post_params: Option<Vec<(String, String)>>) -> Result<Value, HelpScoutError> {
+        self.request(Method::Post, self.url(path, url_params), post_params)
     }
 
-    fn url(&self, prefix: &str, path: &str, params: Option<Vec<(String, String)>>) -> Url {
-        let base = format!("{api_url}/{prefix}/{path}",
+    fn url(&self, path: &str, params: Option<Vec<(String, String)>>) -> Url {
+        let base = format!("{api_url}/{path}",
                            api_url = self.api_url,
-                           prefix = prefix,
                            path = path);
         match params {
             Some(params) => Url::parse_with_params(&base, params),
@@ -69,7 +68,7 @@ impl Client {
     }
 
     //T: What is going on at the start here?
-    fn request(&self, method: Method, url: Url, params: Option<Vec<(String, String)>>) -> Result<(Status, Value), HelpScoutError> {
+    fn request(&self, method: Method, url: Url, params: Option<Vec<(String, String)>>) -> Result<Value, HelpScoutError> {
         let mut count = self.retry_count;
         loop {
             let url = url.clone();
@@ -91,16 +90,16 @@ impl Client {
             // and html content types when returning valid json.
             match serde_json::from_str::<Value>(&body) {
                 Ok(mut value) => {
-                    let status: Status = serde_json::from_value(value.clone())?;
+                    let status = serde_json::from_value(value.clone());
 
                     match res.status() {
-                        StatusCode::Ok => return Ok((status, value)),
-                        StatusCode::BadRequest => return Err(HelpScoutError::BadRequest(status)),
-                        StatusCode::Unauthorized => return Err(HelpScoutError::UnauthorizedKey(status)),
-                        StatusCode::Forbidden => return Err(HelpScoutError::Forbidden(status)),
-                        StatusCode::TooManyRequests => return Err(HelpScoutError::TooManyRequests(status)),
-                        StatusCode::NotFound => return Err(HelpScoutError::UserNotFound(status)),
-                        StatusCode::InternalServerError => return Err(HelpScoutError::InternalServerError(status)),
+                        StatusCode::Ok => return Ok(value),
+                        StatusCode::BadRequest => return Err(HelpScoutError::BadRequest(status?)),
+                        StatusCode::Unauthorized => return Err(HelpScoutError::UnauthorizedKey(status?)),
+                        StatusCode::Forbidden => return Err(HelpScoutError::Forbidden(status?)),
+                        StatusCode::TooManyRequests => return Err(HelpScoutError::TooManyRequests(status?)),
+                        StatusCode::NotFound => return Err(HelpScoutError::UserNotFound(status?)),
+                        StatusCode::InternalServerError => return Err(HelpScoutError::InternalServerError(status?)),
                         s => panic!("Status code not covered in HelpScout REST specification: {}", s),
                     };
                 },

@@ -8,6 +8,7 @@ mod conversations {
     use std::env;
 
     use super::helpscout::{Client, Status, HelpScoutError};
+    use super::helpscout::api::mailboxes::{self};
     use super::helpscout::api::conversations::{self};
 
     #[test]
@@ -17,11 +18,10 @@ mod conversations {
         let API_KEY = env::var("API_KEY").expect("to have API_KEY set");
 
         let mut c = Client::new(&API_KEY);
-        c.retry_wait = 3000;
-        c.retry_count = 10;
-        let (status, _) = conversations::list(&c, "123").expect("Conversations to be listed");
+        let mailboxes = mailboxes::list(&c).expect("To get a list of mailboxes for testing");
+        println!("mailboxes - {:?}", mailboxes);
+        let conversations = conversations::list(&c, mailboxes.items[0].id).expect("Conversations to be listed");
 
-        println!("status - {:?}", status);
         //assert!(status);
     }
 }
