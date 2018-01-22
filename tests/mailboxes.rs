@@ -31,7 +31,7 @@ mod mailboxes {
         let mut c = Client::new(&api_key);
         let mailboxes = mailboxes::list(&c).expect("Grab mailboxes for testing");
         let mailbox = mailboxes::get(&c, mailboxes.items[0].id).expect("Mailboxes to be listed");
-
+        //println!("{:?}", mailbox);
         assert!(mailbox.item.id > 0)
     }
 }

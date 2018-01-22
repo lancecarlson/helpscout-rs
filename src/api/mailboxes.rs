@@ -14,7 +14,14 @@ pub struct Mailbox {
     pub email: String,
     pub created_at: DateTime<Utc>,
     pub modified_at: DateTime<Utc>,
+
+    // Appears in the Object documentation
+    // https://developer.helpscout.com/help-desk-api/objects/mailbox/
     pub custom_fields: Option<Vec<CustomField>>,
+
+    // Appears in the get documentation
+    // https://developer.helpscout.com/help-desk-api/mailboxes/get/
+    pub folders: Option<Vec<Folder>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -35,6 +42,19 @@ pub struct CustomField {
     pub field_type: CustomFieldType,
     pub required: bool,
     pub order: i32,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Folder {
+    pub id: i32,
+    pub name: String,
+    #[serde(rename = "type")]
+    pub folder_type: String,
+    pub user_id: i32,
+    pub total_count: i32,
+    pub active_count: i32,
+    pub modified_at: DateTime<Utc>,
 }
 
 pub fn list(client: &Client) -> Result<Collection<Mailbox>, HelpScoutError> {
