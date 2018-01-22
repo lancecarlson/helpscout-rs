@@ -89,7 +89,7 @@ impl Client {
             // I wish could just check the content type but authy mixes json
             // and html content types when returning valid json.
             match serde_json::from_str::<Value>(&body) {
-                Ok(mut value) => {
+                Ok(value) => {
                     let status = serde_json::from_value(value.clone());
 
                     match res.status() {

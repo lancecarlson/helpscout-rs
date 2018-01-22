@@ -7,7 +7,7 @@ mod conversations {
     use dotenv::dotenv;
     use std::env;
 
-    use super::helpscout::{Client, Status, HelpScoutError};
+    use super::helpscout::{Client, HelpScoutError};
     use super::helpscout::api::mailboxes::{self};
     use super::helpscout::api::conversations::{self};
 
@@ -19,9 +19,8 @@ mod conversations {
 
         let mut c = Client::new(&API_KEY);
         let mailboxes = mailboxes::list(&c).expect("To get a list of mailboxes for testing");
-        println!("mailboxes - {:?}", mailboxes);
         let conversations = conversations::list(&c, mailboxes.items[0].id).expect("Conversations to be listed");
-
-        //assert!(status);
+        //println!("{:?}", conversations.items[0]);
+        assert!(conversations.items.len() > 0);
     }
 }

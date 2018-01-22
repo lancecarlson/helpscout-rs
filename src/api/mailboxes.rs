@@ -23,6 +23,11 @@ pub struct Mailbox {
     // https://developer.helpscout.com/help-desk-api/mailboxes/get/
     pub folders: Option<Vec<Folder>>,
 }
+#[derive(Debug, Deserialize)]
+pub struct MailboxRef {
+    pub id: i32,
+    pub name: String,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
