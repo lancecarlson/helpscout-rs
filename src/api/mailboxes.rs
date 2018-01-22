@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 
 use error::HelpScoutError;
 use client::Client;
-use envelope::Collection;
+use envelope::{Collection, Item};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -41,4 +41,10 @@ pub fn list(client: &Client) -> Result<Collection<Mailbox>, HelpScoutError> {
     let res = client.get("mailboxes.json", None)?;
     let mailboxes = serde_json::from_value(res.clone())?;
     Ok(mailboxes)
+}
+
+pub fn get(client: &Client, id: i32) -> Result<Item<Mailbox>, HelpScoutError> {
+    let res = client.get(&format!("mailboxes/{}.json", id), None)?;
+    let mailbox = serde_json::from_value(res.clone())?;
+    Ok(mailbox)
 }

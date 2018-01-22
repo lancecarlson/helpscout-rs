@@ -5,3 +5,8 @@ pub struct Collection<T> {
     pub count: i32,
     pub items: Vec<T>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct Item<T> {
+    pub item: T,
+}

@@ -22,4 +22,16 @@ mod mailboxes {
 
         assert!(mailboxes.items.len() > 0)
     }
+
+    #[test]
+    fn get() {
+        dotenv().ok();
+        let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
+
+        let mut c = Client::new(&api_key);
+        let mailboxes = mailboxes::list(&c).expect("Grab mailboxes for testing");
+        let mailbox = mailboxes::get(&c, mailboxes.items[0].id).expect("Mailboxes to be listed");
+
+        assert!(mailbox.item.id > 0)
+    }
 }
