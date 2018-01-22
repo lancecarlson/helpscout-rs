@@ -1,0 +1,5 @@
+[package]
+name = "helpscout"
+version = "0.1.0"
+authors = ["Tristan Mortimer <tristan.e.mortimer@gmail.com>"]
+description = "Bindings for the HelpScout API."
