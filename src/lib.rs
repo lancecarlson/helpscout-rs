@@ -9,3 +9,5 @@ pub use error::HelpScoutError;
 
 mod client;
 pub use client::{Client, Status};
+
+pub mod api;

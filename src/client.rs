@@ -37,11 +37,11 @@ pub struct Status {
 
 impl Client {
     /// Create a new client to the HelpScout service.
-    pub fn new(api_url: &str, api_key: &str) -> Client {
+    pub fn new(api_key: &str) -> Client {
         Client {
             retry_count: 3,
             retry_wait: 250,
-            api_url: api_url.into(),
+            api_url: "https://api.helpscout.net/v1".into(),
             api_key: api_key.into(),
             reqwest: reqwest::Client::new().expect("A reqwest client"),
         }
@@ -50,6 +50,7 @@ impl Client {
     /// Send a `get` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
     pub fn get(&self, prefix: &str, path: &str, url_params: Option<Vec<(String, String)>>) -> Result<(Status, Value), HelpScoutError> {
+        println!("getting - {:?}", self.url(prefix, path, url_params.clone()));
         self.request(Method::Get, self.url(prefix, path, url_params), None)
     }
 
@@ -60,7 +61,7 @@ impl Client {
     }
 
     fn url(&self, prefix: &str, path: &str, params: Option<Vec<(String, String)>>) -> Url {
-        let base = format!("{api_url}/{prefix}/json/{path}",
+        let base = format!("{api_url}/{prefix}/{path}",
                            api_url = self.api_url,
                            prefix = prefix,
                            path = path);
