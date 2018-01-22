@@ -29,10 +29,8 @@ pub struct Client {
 /// Status message returned by every API request.
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Status {
-    pub success: bool,
-    pub message: String,
-
-    pub error_code: Option<String>,
+    pub code: Option<i32>,
+    pub error: String,
 }
 
 impl Client {
@@ -50,7 +48,6 @@ impl Client {
     /// Send a `get` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
     pub fn get(&self, prefix: &str, path: &str, url_params: Option<Vec<(String, String)>>) -> Result<(Status, Value), HelpScoutError> {
-        println!("getting - {:?}", self.url(prefix, path, url_params.clone()));
         self.request(Method::Get, self.url(prefix, path, url_params), None)
     }
 
@@ -90,18 +87,6 @@ impl Client {
             // and html content types when returning valid json.
             match serde_json::from_str::<Value>(&body) {
                 Ok(mut value) => {
-                    //T: This *probably* won't be an issue with HelpScout given the code in the HelpScout.rb gem
-                    // It seems that for whatever reason at least one call is returning
-                    // a *string* of a bool rather than a bool for success.
-                    value["success"] = match value.clone()["success"] {
-                        Value::Bool(v) => Value::Bool(v),
-                        Value::String(ref v) => match v.as_ref() {
-                            "true" => Value::Bool(true),
-                            _ => Value::Bool(false),
-                        },
-                        _ => Value::Bool(false),
-                    };
-
                     let status: Status = serde_json::from_value(value.clone())?;
 
                     match res.status() {

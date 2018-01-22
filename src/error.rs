@@ -71,12 +71,12 @@ impl fmt::Display for HelpScoutError {
         use HelpScoutError::*;
 
         match *self {
-            BadRequest(ref s) => write!(f, "Bad Request: {}", s.message),
-            UnauthorizedKey(ref s) => write!(f, "Unauthorized API Key: {}", s.message),
-            Forbidden(ref s) => write!(f, "Forbidden: {}", s.message),
-            UserNotFound(ref s) => write!(f, "User Not Found: {}", s.message),
-            TooManyRequests(ref s) => write!(f, "Too Many Requests: {}", s.message),
-            InternalServerError(ref s) => write!(f, "Internal Server Error: {}", s.message),
+            BadRequest(ref s) => write!(f, "Bad Request: {}", s.error),
+            UnauthorizedKey(ref s) => write!(f, "Unauthorized API Key: {}", s.error),
+            Forbidden(ref s) => write!(f, "Forbidden: {}", s.error),
+            UserNotFound(ref s) => write!(f, "User Not Found: {}", s.error),
+            TooManyRequests(ref s) => write!(f, "Too Many Requests: {}", s.error),
+            InternalServerError(ref s) => write!(f, "Internal Server Error: {}", s.error),
             ServiceUnavailable => write!(f, "Service Unavailable reported by authy service"),
             IoError(ref s) => write!(f, "IO Error: {}", s),
             JsonParseError(ref s) => write!(f, "Json parsing error: {}", s),
