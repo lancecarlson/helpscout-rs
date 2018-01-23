@@ -2,8 +2,10 @@ use serde_json;
 use chrono::{DateTime, Utc};
 use client::Client;
 
+use error::HelpScoutError;
+
 // Tags available for reporting
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct FilterTag {
     pub id: i32,
     pub name: String,
@@ -46,7 +48,7 @@ pub struct PreviousRange {
     pub previous_end: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct ConversationsReportBuilder {
     pub start: DateTime<Utc>,
     pub end: DateTime<Utc>,
@@ -54,6 +56,8 @@ pub struct ConversationsReportBuilder {
     pub tags: Option<String>,
     pub types: Option<String>,
     pub folders: Option<String>,
+
+    pub previous: Option<PreviousRange>,
 }
 
 impl ConversationsReportBuilder {
@@ -61,19 +65,24 @@ impl ConversationsReportBuilder {
         ConversationsReportBuilder {
             start: start,
             end: end,
-            .. ConversationsReportBuilder::default()
+            mailboxes: None,
+            tags: None,
+            types: None,
+            folders: None,
+            previous: None,
         }
     }
 
     pub fn params(&self) -> Option<Vec<(String, String)>> {
         let mut params: Vec<(String, String)> = vec![];
-        params.push(("start".into(), self.start.into()));
-        params.push(("end".into(), self.end.into()));
-        params
+        params.push(("start".into(), format!("{:?}", self.start)));
+        params.push(("end".into(), format!("{:?}", self.end)));
+        Some(params)
     }
 
-    pub fn previous(&self, start: Option<DateTime<Utc>>, end: Option<DateTime<Utc>>) -> ConversationsReportBuilder {
-        &self.previous = PreviousRange{start, end}
+    pub fn previous(&mut self, previous_start: Option<DateTime<Utc>>, previous_end: Option<DateTime<Utc>>) -> &ConversationsReportBuilder {
+        self.previous = Some(PreviousRange{previous_start, previous_end});
+        self
     }
 }
 
@@ -123,8 +132,8 @@ pub struct ConversationsMultipleTimeRangeStatistics {
     pub conversations_per_day: f64,
 }
 
-pub fn conversations_overall(client: &Client, builder: ConversationsReportBuilder) -> ConversationsReport {
-    let res = client.get("reports/conversations.json", None)?;
+pub fn conversations_overall(client: &Client, builder: ConversationsReportBuilder) -> Result<ConversationsReport, HelpScoutError> {
+    let res = client.get("reports/conversations.json", builder.params())?;
     let conversations = serde_json::from_value(res.clone())?;
     Ok(conversations)
 }
