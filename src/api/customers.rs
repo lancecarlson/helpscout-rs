@@ -54,8 +54,8 @@ pub struct Customer {
     //pub websites: Vec<CustomerWebsite>,
 }
 
-pub fn list(client: &Client, mailbox_id: i32) -> Result<Collection<Customer>, HelpScoutError> {
-    let res = client.get(&format!("mailboxes/{}/customers.json", mailbox_id), None)?;
+pub fn list(client: &Client) -> Result<Collection<Customer>, HelpScoutError> {
+    let res = client.get(&format!("customers.json"), None)?;
     let customers = serde_json::from_value(res.clone())?;
     Ok(customers)
 }
