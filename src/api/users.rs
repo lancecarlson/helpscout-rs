@@ -29,18 +29,8 @@ pub struct User {
 }
 
 pub fn list(client: &Client, page: Option<i32>, user_type: Option<UserType>) -> Result<Collection<User>, HelpScoutError> {
-    let mut params: Vec<(String, String)> = vec![];
-
-    if let Some(page) = page {
-        params.push(("page".into(), format!("{}", page)));
-    }
-
-/*    if let Some(user_type) = user_type {
-        let value = serde_json::to_value(user_type)?;
-        params.push(("type".into(), value.to_string()));
-    }*/
-
-    let res = client.get("users.json", None)?;
+    let params = parse_params(page, user_type);
+    let res = client.get("users.json", params)?;
     let users = serde_json::from_value(res.clone())?;
     Ok(users)
 }
@@ -52,18 +42,33 @@ pub fn get(client: &Client, id: i32) -> Result<Item<User>, HelpScoutError> {
 }
 
 pub fn list_by_mailbox(client: &Client, mailbox_id: i32, page: Option<i32>, user_type: Option<UserType>) -> Result<Collection<User>, HelpScoutError> {
+    let params = parse_params(page, user_type);
+    let res = client.get(&format!("mailboxes/{}/users.json", mailbox_id), params)?;
+    let users = serde_json::from_value(res.clone())?;
+    Ok(users)
+}
+
+fn parse_params(page: Option<i32>, user_type: Option<UserType>) -> Option<Vec<(String, String)>> {
     let mut params: Vec<(String, String)> = vec![];
 
     if let Some(page) = page {
         params.push(("page".into(), format!("{}", page)));
     }
 
-/*    if let Some(user_type) = user_type {
-        let value = serde_json::to_value(user_type)?;
-        params.push(("type".into(), value.to_string()));
-    }*/
+    if let Some(user_type) = user_type {
+        match serde_json::to_value(user_type) {
+            Ok(value) => {
+                params.push(("type".into(), value.to_string().replace("\"", "")));
+            },
+            Err(e) => {
+                return None
+            }
+        }
+    }
 
-    let res = client.get("mailboxes/{}/users.json", None)?;
-    let users = serde_json::from_value(res.clone())?;
-    Ok(users)
+    if params.len() > 0 {
+        Some(params)
+    } else {
+        None
+    }
 }
