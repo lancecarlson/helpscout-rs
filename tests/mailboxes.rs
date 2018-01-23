@@ -34,4 +34,16 @@ mod mailboxes {
         //println!("{:?}", mailbox);
         assert!(mailbox.item.id > 0)
     }
+
+    #[test]
+    fn get_folders() {
+        dotenv().ok();
+        let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
+
+        let mut c = Client::new(&api_key);
+        let mailboxes = mailboxes::list(&c).expect("Grab mailboxes for testing");
+        let folders = mailboxes::get_folders(&c, mailboxes.items[0].id).expect("Folders from Mailbox to be listed");
+        //println!("{:?}", folders);
+        assert!(folders.items.len() > 0)
+    }
 }

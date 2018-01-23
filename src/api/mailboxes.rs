@@ -74,3 +74,9 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Mailbox>, HelpScoutError> {
     let mailbox = serde_json::from_value(res.clone())?;
     Ok(mailbox)
 }
+
+pub fn get_folders(client: &Client, mailbox_id:i32) -> Result<Collection<Folder>, HelpScoutError>{
+    let res = client.get(&format!("mailboxes/{}/folders.json", mailbox_id), None)?;
+    let folders = serde_json::from_value(res.clone())?;
+    Ok(folders)
+}
