@@ -209,8 +209,8 @@ pub struct ConversationThread {
     pub cc: Option<Vec<String>>,
     pub bcc: Option<Vec<String>>,
     pub attachments: Option<Vec<Attachment>>,
-/*    pub saved_reply_id: i32,
-    pub created_by_customer: bool,*/
+    pub saved_reply_id: Option<i32>,
+    pub created_by_customer: bool,
 }
 
 #[derive(Debug, Default, Serialize)]
