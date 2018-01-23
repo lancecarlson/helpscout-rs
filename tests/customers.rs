@@ -3,7 +3,7 @@ extern crate helpscout;
 extern crate dotenv;
 
 #[cfg(test)]
-mod conversations {
+mod customers {
     use dotenv::dotenv;
     use std::env;
 
@@ -18,7 +18,7 @@ mod conversations {
 
         let mut c = Client::new(&API_KEY);
         let customers = customers::list(&c).expect("Customers to be listed");
-        println!("{:?}", customers.items[0]);
+        //println!("{:?}", customers.items[0]);
         assert!(customers.items.len() > 0);
     }
 }
