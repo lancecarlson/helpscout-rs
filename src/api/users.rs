@@ -60,7 +60,7 @@ fn parse_params(page: Option<i32>, user_type: Option<UserType>) -> Option<Vec<(S
             Ok(value) => {
                 params.push(("type".into(), value.to_string().replace("\"", "")));
             },
-            Err(e) => {
+            Err(_) => {
                 return None
             }
         }

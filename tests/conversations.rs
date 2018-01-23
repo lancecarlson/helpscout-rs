@@ -7,16 +7,19 @@ mod conversations {
     use dotenv::dotenv;
     use std::env;
 
-    use super::helpscout::{Client, HelpScoutError};
-    use super::helpscout::api::mailboxes::{self};
-    use super::helpscout::api::conversations::{self};
+    use super::helpscout::Client;
+    use super::helpscout::api::person::Person;
+    use super::helpscout::api::users::{self};
+    use super::helpscout::api::mailboxes::{self, MailboxRef};
+    use super::helpscout::api::customers::{self};
+    use super::helpscout::api::conversations::{self, ConversationThreadType, NewConversation, NewConversationThread};
 
     #[test]
     fn list_and_get() {
         dotenv().ok();
         let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
 
-        let mut c = Client::new(&api_key);
+        let c = Client::new(&api_key);
         let mailboxes = mailboxes::list(&c).expect("Grab mailboxes for testing");
         let conversations = conversations::list(&c, mailboxes.items[0].id).expect("Conversations to be listed");
 
@@ -34,70 +37,30 @@ mod conversations {
         //assert!(attachment_data.item.id > 0);
     }
 
-/*    #[test]
+    #[test]
     fn create_update_delete() {
         dotenv().ok();
         let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
-        let mut c = Client::new(&api_key);
+        let c = Client::new(&api_key);
 
         let mailboxes = mailboxes::list(&c).expect("Grab mailboxes for testing");
+        let mailbox_ref = MailboxRef{id: mailboxes.items[0].id, name: "".into()};
+        let users = users::list(&c, None, None).expect("Grab users for testing");
+        let customers = customers::list(&c).expect("Grab customers for testing");
 
-        let created_by = &Person{id: 1234, email: "customer@example.com", person_type: "customer"};
+        println!("{:#?}", customers);
 
-        let thread = &NewConversationThread {
-                    conversation_thread_type: "customer",
-                    created_by: {
-                        id: 1234,
-                        email: "customer@example.com",
-                        type: "customer"
-                    },
-                    body: "I need your help with an issue I'm having.",
-                    assignedTo: {
-                        id: 2222
-                    },
-                    status: "active",
-                    createdAt: "2012-07-23T12:34:12Z",
-                    cc: [
-                        "user1@example.com",
-                        "user2@example.com"
-                    ],
-                    bcc: [
-                        "user3@example.com",
-                        "user4@example.com"
-                    ],
-                    attachments: [
-                        {
-                            hash: "7gjj3dg7fs3cvi956jjgfsw"
-                        },
-                        {
-                            hash: "hfsf63fjgle8jglglksd285"
-                        }
-                    ]
-        };
+        let created_by = Person::new(users.items[0].id);
+        let customer = Person::new(customers.items[0].id);
 
-        let conversation = &Conversation{
-            customer: &Customer {id: 1234, email: "customer@example.com"},
-            subject: "TEST - I need help",
-            mailbox: {id: mailboxes[0].item.id},
-            tags: ["tag1", "tag2"],
-            status: ConversationStatus::Active,
-//            createdAt: "2012-07-23T12:34:12Z",
-            threads: vec![
-            ],
-            customFields : [
-                {
-                    fieldId: 10,
-                    value: "Custom Support"
-                },
-                {
-                    fieldId: 11,
-                    value : "10.5"
-                },
-                {
-                    fieldId: 12,
-                    value : "2015-12-01 12:20:20"
-                }
-            ]
-        };
-    }*/
+        let thread = NewConversationThread::new(
+            ConversationThreadType::Customer,
+            created_by,
+            "I need your help with an issue I'm having.".into()
+        );
+
+        let conversation = NewConversation::new(customer, "TESTING FROM RUST LIBRARY".into(), mailbox_ref, vec![thread]);
+
+        println!("{:#?}", conversation);
+    }
 }
