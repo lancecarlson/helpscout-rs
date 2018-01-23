@@ -6,7 +6,7 @@ pub enum PersonType {
     Team
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Person {
     pub id: i32,
@@ -19,4 +19,19 @@ pub struct Person {
     #[serde(rename = "type")]
     pub person_type: Option<PersonType>,
     pub photo_url: Option<String>,
+}
+
+impl Person {
+    pub fn new(id: i32) -> Person {
+        Person {
+            id: id,
+            first_name: None,
+            last_name: None,
+            email: None,
+            emails: None,
+            phone: None,
+            person_type: None,
+            photo_url: None,
+        }
+    }
 }

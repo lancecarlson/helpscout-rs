@@ -34,6 +34,7 @@ pub enum ConversationSourceType {
     EmailForward,
     Api,
     Chat,
+    Workflows,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -54,6 +55,11 @@ pub enum ConversationThreadType {
     ForwardParent,
     ForwardChild,
     Phone,
+}
+
+// Implemented to satisfy Default, which is customer in this case.
+impl Default for ConversationThreadType {
+    fn default() -> ConversationThreadType { ConversationThreadType::Customer }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -77,6 +83,7 @@ pub enum ConversationActionType {
     ChangedTicketCustomer,
     DeletedTicket,
     RestoreTicket,
+    OriginalCreator,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -118,7 +125,7 @@ pub struct Conversation {
 
     // Additional fields that appear only when retrieving a single Conversation
     // TODO: complete
-    pub threads: Vec<ConversationThread>,
+    pub threads: Option<Vec<ConversationThread>>,
     //pub custom_fields: Vec<CustomField>,
 }
 
@@ -130,12 +137,26 @@ pub struct NewConversation {
     pub customer: Person,
     pub subject: String,
     pub mailbox: MailboxRef,
-    pub tags: Vec<String>,
-    pub created_at: DateTime<Utc>,
+    pub tags: Option<Vec<String>>,
+    pub created_at: Option<DateTime<Utc>>,
 
     // Additional fields that appear only when retrieving a single Conversation
     pub threads: Vec<NewConversationThread>,
 //    pub custom_fields: Option<Vec<CustomField>>,
+}
+
+impl NewConversation {
+    pub fn new(customer: Person, subject: String, mailbox: MailboxRef, threads: Vec<NewConversationThread>) -> NewConversation {
+        NewConversation {
+            conversation_type: None,
+            customer: customer,
+            subject: subject,
+            mailbox: mailbox,
+            tags: None,
+            created_at: None,
+            threads: threads,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -172,27 +193,27 @@ pub struct ConversationThread {
     pub id: i32,
     #[serde(rename = "type")]
     pub conversation_thread_type: ConversationThreadType,
-    pub assigned_to: Person,
+    pub assigned_to: Option<Person>,
     pub status: ConversationThreadStatus,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub created_by: Person,
-    pub source: ConversationSource,
-    pub action_type: ConversationActionType,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub created_by: Option<Person>,
+    pub source: Option<ConversationSource>,
+    pub action_type: Option<ConversationActionType>,
     pub action_source_id: Option<i32>,
-    pub from_mailbox: MailboxRef,
-    pub state: ConversationThreadState,
-    pub customer: Person,
-    pub body: String,
-    pub to: Vec<String>,
+    pub from_mailbox: Option<MailboxRef>,
+    pub state: Option<ConversationThreadState>,
+    pub customer: Option<Person>,
+    pub body: Option<String>,
+    pub to: Option<Vec<String>>,
     pub cc: Option<Vec<String>>,
     pub bcc: Option<Vec<String>>,
     pub attachments: Option<Vec<Attachment>>,
-    pub saved_reply_id: i32,
+    pub saved_reply_id: Option<i32>,
     pub created_by_customer: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewConversationThread {
     pub created_by: Person,
@@ -204,6 +225,27 @@ pub struct NewConversationThread {
     pub cc: Option<Vec<String>>,
     pub bcc: Option<Vec<String>>,
     pub attachments: Option<Vec<Attachment>>,
+}
+
+impl NewConversationThread {
+    pub fn new(conversation_thread_type: ConversationThreadType, created_by: Person, body: String) -> NewConversationThread {
+        NewConversationThread {
+            conversation_thread_type: conversation_thread_type,
+            created_by: created_by,
+            body: body,
+            .. NewConversationThread::default()
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomField {
+    pub field_id: i32,
+    pub name: String,
+    pub value: String,
+    pub field_type: String,
+    pub label: String,
 }
 
 pub fn list(client: &Client, mailbox_id: i32) -> Result<Collection<Conversation>, HelpScoutError> {
