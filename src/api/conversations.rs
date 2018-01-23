@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 
 use error::HelpScoutError;
 use client::Client;
-use envelope::Collection;
+use envelope::{Collection, Item};
 use api::person::Person;
 use api::mailboxes::MailboxRef;
 
@@ -63,7 +63,7 @@ pub struct Conversation {
     pub created_at: DateTime<Utc>,
     // Deprecated in favor of user_modified_at ?
     pub modified_at: Option<DateTime<Utc>>,
-    pub user_modified_at: DateTime<Utc>,
+    pub user_modified_at: Option<DateTime<Utc>>,
     pub closed_at: Option<DateTime<Utc>>,
     pub closed_by: Option<Person>,
     pub source: ConversationSource,
@@ -88,4 +88,10 @@ pub fn list(client: &Client, mailbox_id: i32) -> Result<Collection<Conversation>
     let res = client.get(&format!("mailboxes/{}/conversations.json", mailbox_id), None)?;
     let conversations = serde_json::from_value(res.clone())?;
     Ok(conversations)
+}
+
+pub fn get(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutError> {
+    let res = client.get(&format!("conversations/{}.json", id), None)?;
+    let conversation = serde_json::from_value(res.clone())?;
+    Ok(conversation)
 }
