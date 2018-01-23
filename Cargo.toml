@@ -3,7 +3,7 @@ name = "helpscout"
 version = "0.0.1"
 authors = ["Lance Carlson <lancecarlson@gmail.com>", "Tristan Mortimer <tristan.e.mortimer@gmail.com>"]
 description = "Bindings for the HelpScout API."
-
+license = "MIT"
 
 [dependencies]
 reqwest = "0.7"
