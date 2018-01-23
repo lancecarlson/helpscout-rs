@@ -53,8 +53,8 @@ impl Client {
 
     /// Send a `post` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
-    pub fn post(&self, path: &str, url_params: Option<Vec<(String, String)>>, post_params: Option<Vec<(String, String)>>) -> Result<Value, HelpScoutError> {
-        self.request(Method::Post, self.url(path, url_params), post_params)
+    pub fn post(&self, path: &str, url_params: Option<Vec<(String, String)>>, body: Option<String>) -> Result<Value, HelpScoutError> {
+        self.request(Method::Post, self.url(path, url_params), body)
     }
 
     fn url(&self, path: &str, params: Option<Vec<(String, String)>>) -> Url {
@@ -68,7 +68,7 @@ impl Client {
     }
 
     //T: What is going on at the start here?
-    fn request(&self, method: Method, url: Url, params: Option<Vec<(String, String)>>) -> Result<Value, HelpScoutError> {
+    fn request(&self, method: Method, url: Url, request_body: Option<String>) -> Result<Value, HelpScoutError> {
         let mut count = self.retry_count;
         loop {
             let url = url.clone();
@@ -78,8 +78,8 @@ impl Client {
                 password: Some("X".into()),
             };
             headers.set(Authorization(credentials));
-            let mut res = match params.clone() {
-                Some(p) => self.reqwest.request(method.clone(), url)?.headers(headers).form(&p)?.send()?,
+            let mut res = match request_body.clone() {
+                Some(b) => self.reqwest.request(method.clone(), url)?.headers(headers).body(b).send()?,
                 None => self.reqwest.request(method.clone(), url)?.headers(headers).send()?,
             };
 
