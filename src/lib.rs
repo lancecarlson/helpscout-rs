@@ -8,6 +8,9 @@ extern crate serde_url_params;
 
 extern crate chrono;
 
+#[macro_use]
+extern crate log;
+
 mod error;
 pub use error::HelpScoutError;
 

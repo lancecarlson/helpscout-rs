@@ -80,6 +80,9 @@ impl Client {
         let mut count = self.retry_count;
         loop {
             let url = url.clone();
+
+            debug!("Attempting request - Method: {}. Url: {}", method, url);
+
             let mut headers = Headers::new();
             let credentials = Basic {
                 username: self.api_key.clone(),
@@ -87,12 +90,17 @@ impl Client {
             };
             headers.set(Authorization(credentials));
             let mut res = match request_body.clone() {
-                Some(b) => self.reqwest.request(method.clone(), url)?.headers(headers).body(b).send()?,
+                Some(b) => {
+                    debug!("Request body - {}", b);
+                    self.reqwest.request(method.clone(), url)?.headers(headers).body(b).send()?
+                },
                 None => self.reqwest.request(method.clone(), url)?.headers(headers).send()?,
             };
 
             let mut body = String::new();
             res.read_to_string(&mut body)?;
+
+            debug!("Response body: {}", body);
 
             // I wish could just check the content type but authy mixes json
             // and html content types when returning valid json.
