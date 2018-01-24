@@ -42,6 +42,34 @@ pub struct ReplyStatistics {
     pub mailbox_id: i32,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct FieldStatistics {
+    pub count: i64,
+    pub fields: Vec<CustomFieldStatistics>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomFieldStatistics {
+    pub id: i64,
+    pub name: String,
+    pub mailbox_id: i32,
+    pub values: Vec<Statistics>,
+    pub summary: CustomFieldSummary
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomFieldSummary {
+    pub total: i64,
+    pub total_answered: i64,
+    pub previous_total: Option<i64>,
+    pub previous_total_answered: Option<i64>,
+    pub unanswered_delta: f64,
+    pub unanswered_previous_percent: f64,
+    pub unanswered_percent: f64,
+}
+
 // Optionally set this previous time range to compare against
 #[derive(Debug, Default, Serialize)]
 pub struct PreviousRange {
@@ -82,7 +110,7 @@ impl ConversationsReportBuilder {
         }
     }
 
-    pub fn previous(&mut self, previous_start: DateTime<Utc>, previous_end: DateTime<Utc>) -> &ConversationsReportBuilder {
+    pub fn previous(mut self, previous_start: DateTime<Utc>, previous_end: DateTime<Utc>) -> ConversationsReportBuilder {
         self.previous_start = Some(previous_start);
         self.previous_end = Some(previous_end);
         self
@@ -135,8 +163,21 @@ pub struct ConversationsMultipleTimeRangeStatistics {
     pub conversations_per_day: f64,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct BusyTimeStatistics {
+    pub day: i32,
+    pub hour: i32,
+    pub count: i32,
+}
+
 pub fn conversations_overall(client: &Client, builder: ConversationsReportBuilder) -> Result<ConversationsReport, HelpScoutError> {
     let res = client.get("reports/conversations.json", builder)?;
+    let conversations = serde_json::from_value(res.clone())?;
+    Ok(conversations)
+}
+
+pub fn conversations_busy_times(client: &Client, builder: ConversationsReportBuilder) -> Result<Vec<BusyTimeStatistics>, HelpScoutError> {
+    let res = client.get("reports/conversations/busy-times.json", builder)?;
     let conversations = serde_json::from_value(res.clone())?;
     Ok(conversations)
 }
