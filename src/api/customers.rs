@@ -150,8 +150,9 @@ pub struct CustomerWebsite {
     pub value: String,
 }
 
-pub fn list(client: &Client) -> Result<Collection<Customer>, HelpScoutError> {
-    let res = client.get("customers.json", None)?;
+pub fn list(client: &Client, first_name: Option<&str>,last_name: Option<&str>,email: Option<&str>, page: Option<i32>) -> Result<Collection<Customer>, HelpScoutError> {
+    let params = parse_params(first_name,last_name,email,page);
+    let res = client.get("customers.json", params)?;
     let customers = serde_json::from_value(res.clone())?;
     Ok(customers)
 }
@@ -166,4 +167,34 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
     let res = client.get(&format!("customers/{}.json", id), None)?;
     let customer = serde_json::from_value(res.clone())?;
     Ok(customer)
+}
+
+fn parse_params(first_name: Option<&str>,last_name: Option<&str>,email: Option<&str>, page: Option<i32> ) -> Option<Vec<(String, String)>> {
+    let mut params: Vec<(String, String)> = vec![];
+
+    if let Some(first_name) = first_name {
+        params.push(("firstName".into(), format!("{}", first_name)));
+    }
+
+    if let Some(last_name) = last_name {
+        params.push(("lastName".into(), format!("{}", last_name)));
+    }
+
+    if let Some(email) = email {
+        params.push(("email".into(), format!("{}", email)));
+    }
+
+    /*if let Some(modified_since) = modified_since {
+        params.push(("modifiedSince".into(), format!("{}", modified_since)));
+    }*/
+
+    if let Some(page) = page {
+        params.push(("page".into(), format!("{}", page)));
+    }
+
+    if params.len() > 0 {
+        Some(params)
+    } else {
+        None
+    }
 }

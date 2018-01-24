@@ -19,8 +19,8 @@ mod customers {
         let API_KEY = env::var("API_KEY").expect("to have API_KEY set");
 
         let mut c = Client::new(&API_KEY);
-        
-        let customers = customers::list(&c).expect("Customers to be listed");
+        let pageNum = 1;
+        let customers = customers::list(&c,None,Some("Scout"),None,Some(1)).expect("Customers to be listed");
         //println!("{:?}", customers.items[0]);
         assert!(customers.items.len() > 0);
 
