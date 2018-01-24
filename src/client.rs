@@ -43,7 +43,7 @@ impl Client {
             retry_wait: 250,
             api_url: "https://api.helpscout.net/v1".into(),
             api_key: api_key.into(),
-            reqwest: reqwest::Client::new().expect("A reqwest client"),
+            reqwest: reqwest::Client::new(),
         }
     }
 
@@ -92,9 +92,9 @@ impl Client {
             let mut res = match request_body.clone() {
                 Some(b) => {
                     debug!("Request body - {}", b);
-                    self.reqwest.request(method.clone(), url)?.headers(headers).body(b).send()?
+                    self.reqwest.request(method.clone(), url).headers(headers).body(b).send()?
                 },
-                None => self.reqwest.request(method.clone(), url)?.headers(headers).send()?,
+                None => self.reqwest.request(method.clone(), url).headers(headers).send()?,
             };
 
             let mut body = String::new();
