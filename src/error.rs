@@ -4,7 +4,7 @@ use std::fmt;
 
 use reqwest;
 use serde_json;
-use serde_urlencoded;
+use serde_url_params;
 
 use client::Status;
 
@@ -115,8 +115,8 @@ impl From<serde_json::Error> for HelpScoutError {
     }
 }
 
-impl From<serde_urlencoded::ser::Error> for HelpScoutError {
-    fn from(e: serde_urlencoded::ser::Error) -> Self {
+impl From<serde_url_params::Error> for HelpScoutError {
+    fn from(e: serde_url_params::Error) -> Self {
         HelpScoutError::RequestUrlEncodeError(e.to_string())
     }
 }

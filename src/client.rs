@@ -6,7 +6,7 @@ use reqwest::{self, StatusCode, Method, Url};
 use reqwest::header::{Headers, Authorization, Basic};
 use serde;
 use serde_json::{self, Value};
-use serde_urlencoded;
+use serde_url_params;
 
 use error::HelpScoutError;
 
@@ -70,7 +70,7 @@ impl Client {
                            api_url = self.api_url,
                            path = path);
 
-        let encoded = serde_urlencoded::to_string(params)?;
+        let encoded = serde_url_params::to_string(&params)?;
         base = format!("{}?{}", base, encoded);
         Ok(Url::parse(&base)?)
     }
