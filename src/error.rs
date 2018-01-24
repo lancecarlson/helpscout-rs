@@ -4,6 +4,7 @@ use std::fmt;
 
 use reqwest;
 use serde_json;
+use serde_urlencoded;
 
 use client::Status;
 
@@ -40,8 +41,11 @@ pub enum HelpScoutError {
     /// We made a request the server didn't like.
     RequestError(String),
 
-    /// We made a request with bad parameters.
-    RequestParamError(String),
+    /// We made a request with a bad url
+    RequestUrlError(String),
+
+    /// We made a request with a bad url
+    RequestUrlEncodeError(String),
 
     /// The server gave an invalid response.
     InvalidServerResponse,
@@ -61,7 +65,8 @@ impl error::Error for HelpScoutError {
             IoError(_) => "IO error",
             JsonParseError(_) => "JSON parse error",
             RequestError(_) => "Request error",
-            RequestParamError(_) => "Request param error",
+            RequestUrlError(_) => "Request URL error",
+            RequestUrlEncodeError(_) => "Request URL Encode error",
             InvalidServerResponse => "Invalid server response",
         }
     }
@@ -85,7 +90,8 @@ impl fmt::Display for HelpScoutError {
             IoError(ref s) => write!(f, "IO Error: {}", s),
             JsonParseError(ref s) => write!(f, "Json parsing error: {}", s),
             RequestError(ref s) => write!(f, "Request error: {}", s),
-            RequestParamError(ref s) => write!(f, "Bad request params: {}", s),
+            RequestUrlError(ref s) => write!(f, "Bad Request URL: {}", s),
+            RequestUrlEncodeError(ref s) => write!(f, "Bad Request URL Encoding: {}", s),
             InvalidServerResponse => write!(f, "Server returned an invalid response"),
         }
     }
@@ -99,13 +105,19 @@ impl From<reqwest::Error> for HelpScoutError {
 
 impl From<reqwest::UrlError> for HelpScoutError {
     fn from(e: reqwest::UrlError) -> Self {
-        HelpScoutError::RequestParamError(e.to_string())
+        HelpScoutError::RequestUrlError(e.to_string())
     }
 }
 
 impl From<serde_json::Error> for HelpScoutError {
     fn from(e: serde_json::Error) -> Self {
         HelpScoutError::JsonParseError(e.to_string())
+    }
+}
+
+impl From<serde_urlencoded::ser::Error> for HelpScoutError {
+    fn from(e: serde_urlencoded::ser::Error) -> Self {
+        HelpScoutError::RequestUrlEncodeError(e.to_string())
     }
 }
 

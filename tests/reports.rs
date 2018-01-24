@@ -26,7 +26,7 @@ mod reports {
         let builder = reports::ConversationsReportBuilder::new(start, end);
         let reports = reports::conversations_overall(&c, builder).expect("Grab reports for testing");
 
-        println!("{:?}", reports);
-        //assert!(reports.items.len() > 0);
+        //println!("{:?}", reports);
+        assert!(reports.current.total_conversations > 0);
     }
 }

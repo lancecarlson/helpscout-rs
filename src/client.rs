@@ -69,18 +69,9 @@ impl Client {
         let mut base = format!("{api_url}/{path}",
                            api_url = self.api_url,
                            path = path);
-/*        match params {
-            Some(params) => {
-                let encoded = serde_urlencoded::to_string(params);
-                println!("encoded - {:?}", encoded);
-                base = format!("{}?{:?}", base, encoded);
-                Url::parse(&base)
-            },
-            None => Url::parse(&base),
-    }.expect("Url to be valid")*/
-        let encoded = serde_urlencoded::to_string(params);
-        println!("encoded - {:?}", encoded);
-        base = format!("{}?{:?}", base, encoded);
+
+        let encoded = serde_urlencoded::to_string(params)?;
+        base = format!("{}?{}", base, encoded);
         Ok(Url::parse(&base)?)
     }
 
@@ -89,7 +80,6 @@ impl Client {
         let mut count = self.retry_count;
         loop {
             let url = url.clone();
-            println!("url - {}", url);
             let mut headers = Headers::new();
             let credentials = Basic {
                 username: self.api_key.clone(),

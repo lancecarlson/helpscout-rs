@@ -24,10 +24,10 @@ pub struct Statistics {
     pub id: i64,
     pub name: Option<String>,
     pub count: i64,
-    pub previous_count: i64,
+    pub previous_count: Option<i64>,
     pub percent: f64,
-    pub previous_percent: f64,
-    pub delta_percent: f64,
+    pub previous_percent: Option<f64>,
+    pub delta_percent: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -94,13 +94,13 @@ impl ConversationsReportBuilder {
 #[serde(rename_all = "camelCase")]
 pub struct ConversationsReport {
     pub filter_tags: Vec<FilterTag>,
-    pub company_id: i64,
+    pub company_id: Option<i64>,
     pub busiest_day: BusiestDay,
-    pub busiest_time_start: i32,
-    pub busiest_time_end: i32,
+    pub busiest_time_start: Option<i32>,
+    pub busiest_time_end: Option<i32>,
     pub current: ConversationsTimeRangeStatistics,
-    pub previous: ConversationsTimeRangeStatistics,
-    pub delta: ConversationsMultipleTimeRangeStatistics,
+    pub previous: Option<ConversationsTimeRangeStatistics>,
+    pub delta: Option<ConversationsMultipleTimeRangeStatistics>,
     pub tags: TopStatistics<Statistics>,
     pub customers: TopStatistics<Statistics>,
     pub replies: TopStatistics<ReplyStatistics>,
@@ -137,7 +137,7 @@ pub struct ConversationsMultipleTimeRangeStatistics {
 }
 
 pub fn conversations_overall(client: &Client, builder: ConversationsReportBuilder) -> Result<ConversationsReport, HelpScoutError> {
-    let res = client.get("reports/conversations.json", builder.params())?;
+    let res = client.get("reports/conversations.json", builder)?;
     let conversations = serde_json::from_value(res.clone())?;
     Ok(conversations)
 }
