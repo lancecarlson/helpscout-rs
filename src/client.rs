@@ -4,7 +4,9 @@ use std::time::Duration;
 
 use reqwest::{self, StatusCode, Method, Url};
 use reqwest::header::{Headers, Authorization, Basic};
+use serde;
 use serde_json::{self, Value};
+use serde_urlencoded;
 
 use error::HelpScoutError;
 
@@ -47,24 +49,39 @@ impl Client {
 
     /// Send a `get` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
-    pub fn get(&self, path: &str, url_params: Option<Vec<(String, String)>>) -> Result<Value, HelpScoutError> {
-        self.request(Method::Get, self.url(path, url_params), None)
+    pub fn get<T>(&self, path: &str, url_params: T) -> Result<Value, HelpScoutError>
+        where T: serde::Serialize
+    {
+        self.request(Method::Get, self.url(path, url_params)?, None)
     }
 
     /// Send a `post` request to the HelpScout service. This is intended to be used
     /// by the library and not the user.
-    pub fn post(&self, path: &str, url_params: Option<Vec<(String, String)>>, body: Option<String>) -> Result<Value, HelpScoutError> {
-        self.request(Method::Post, self.url(path, url_params), body)
+    pub fn post<T>(&self, path: &str, url_params: T, body: Option<String>) -> Result<Value, HelpScoutError>
+        where T: serde::Serialize
+    {
+        self.request(Method::Post, self.url(path, url_params)?, body)
     }
 
-    fn url(&self, path: &str, params: Option<Vec<(String, String)>>) -> Url {
-        let base = format!("{api_url}/{path}",
+    fn url<T>(&self, path: &str, params: T) -> Result<Url, HelpScoutError>
+        where T: serde::Serialize
+    {
+        let mut base = format!("{api_url}/{path}",
                            api_url = self.api_url,
                            path = path);
-        match params {
-            Some(params) => Url::parse_with_params(&base, params),
+/*        match params {
+            Some(params) => {
+                let encoded = serde_urlencoded::to_string(params);
+                println!("encoded - {:?}", encoded);
+                base = format!("{}?{:?}", base, encoded);
+                Url::parse(&base)
+            },
             None => Url::parse(&base),
-        }.expect("Url to be valid")
+    }.expect("Url to be valid")*/
+        let encoded = serde_urlencoded::to_string(params);
+        println!("encoded - {:?}", encoded);
+        base = format!("{}?{:?}", base, encoded);
+        Ok(Url::parse(&base)?)
     }
 
     //T: What is going on at the start here?
@@ -72,6 +89,7 @@ impl Client {
         let mut count = self.retry_count;
         loop {
             let url = url.clone();
+            println!("url - {}", url);
             let mut headers = Headers::new();
             let credentials = Basic {
                 username: self.api_key.clone(),

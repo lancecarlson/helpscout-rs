@@ -40,6 +40,9 @@ pub enum HelpScoutError {
     /// We made a request the server didn't like.
     RequestError(String),
 
+    /// We made a request with bad parameters.
+    RequestParamError(String),
+
     /// The server gave an invalid response.
     InvalidServerResponse,
 }
@@ -58,6 +61,7 @@ impl error::Error for HelpScoutError {
             IoError(_) => "IO error",
             JsonParseError(_) => "JSON parse error",
             RequestError(_) => "Request error",
+            RequestParamError(_) => "Request param error",
             InvalidServerResponse => "Invalid server response",
         }
     }
@@ -81,6 +85,7 @@ impl fmt::Display for HelpScoutError {
             IoError(ref s) => write!(f, "IO Error: {}", s),
             JsonParseError(ref s) => write!(f, "Json parsing error: {}", s),
             RequestError(ref s) => write!(f, "Request error: {}", s),
+            RequestParamError(ref s) => write!(f, "Bad request params: {}", s),
             InvalidServerResponse => write!(f, "Server returned an invalid response"),
         }
     }
@@ -89,6 +94,12 @@ impl fmt::Display for HelpScoutError {
 impl From<reqwest::Error> for HelpScoutError {
     fn from(e: reqwest::Error) -> Self {
         HelpScoutError::RequestError(e.to_string())
+    }
+}
+
+impl From<reqwest::UrlError> for HelpScoutError {
+    fn from(e: reqwest::UrlError) -> Self {
+        HelpScoutError::RequestParamError(e.to_string())
     }
 }
 

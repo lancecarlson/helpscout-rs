@@ -64,19 +64,19 @@ pub struct Folder {
 }
 
 pub fn list(client: &Client) -> Result<Collection<Mailbox>, HelpScoutError> {
-    let res = client.get("mailboxes.json", None)?;
+    let res = client.get("mailboxes.json", ())?;
     let mailboxes = serde_json::from_value(res.clone())?;
     Ok(mailboxes)
 }
 
 pub fn get(client: &Client, id: i32) -> Result<Item<Mailbox>, HelpScoutError> {
-    let res = client.get(&format!("mailboxes/{}.json", id), None)?;
+    let res = client.get(&format!("mailboxes/{}.json", id), ())?;
     let mailbox = serde_json::from_value(res.clone())?;
     Ok(mailbox)
 }
 
 pub fn get_folders(client: &Client, mailbox_id:i32) -> Result<Collection<Folder>, HelpScoutError>{
-    let res = client.get(&format!("mailboxes/{}/folders.json", mailbox_id), None)?;
+    let res = client.get(&format!("mailboxes/{}/folders.json", mailbox_id), ())?;
     let folders = serde_json::from_value(res.clone())?;
     Ok(folders)
 }

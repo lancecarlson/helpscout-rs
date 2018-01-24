@@ -158,13 +158,13 @@ pub fn list(client: &Client, first_name: Option<&str>,last_name: Option<&str>,em
 }
 
 pub fn list_by_mailbox(client: &Client, mailbox_id: i32) -> Result<Collection<Customer>, HelpScoutError> {
-    let res = client.get(&format!("mailboxes/{}/customers.json", mailbox_id), None)?;
+    let res = client.get(&format!("mailboxes/{}/customers.json", mailbox_id), ())?;
     let customers = serde_json::from_value(res.clone())?;
     Ok(customers)
 }
 
 pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
-    let res = client.get(&format!("customers/{}.json", id), None)?;
+    let res = client.get(&format!("customers/{}.json", id), ())?;
     let customer = serde_json::from_value(res.clone())?;
     Ok(customer)
 }

@@ -249,20 +249,20 @@ pub struct CustomField {
 }
 
 pub fn list(client: &Client, mailbox_id: i32) -> Result<Collection<Conversation>, HelpScoutError> {
-    let res = client.get(&format!("mailboxes/{}/conversations.json", mailbox_id), None)?;
+    let res = client.get(&format!("mailboxes/{}/conversations.json", mailbox_id), ())?;
     let conversations = serde_json::from_value(res.clone())?;
     Ok(conversations)
 }
 
 pub fn get(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutError> {
-    let res = client.get(&format!("conversations/{}.json", id), None)?;
+    let res = client.get(&format!("conversations/{}.json", id), ())?;
     let conversation = serde_json::from_value(res.clone())?;
     Ok(conversation)
 }
 
 pub fn create(client: &Client, conversation: &NewConversation, imported: Option<bool>, auto_reply: Option<bool>, reload: Option<bool>) -> Result<(), HelpScoutError> {
     let body = serde_json::to_value(conversation)?;
-    let res = client.post("conversations.json", None, Some(body.to_string()))?;
+    let res = client.post("conversations.json", (), Some(body.to_string()))?;
     Ok(())
 }
 
@@ -274,13 +274,13 @@ pub fn update(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutE
 }
 */
 pub fn delete(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutError> {
-    let res = client.get(&format!("conversations/{}.json", id), None)?;
+    let res = client.get(&format!("conversations/{}.json", id), ())?;
     let conversation = serde_json::from_value(res.clone())?;
     Ok(conversation)
 }
 
 pub fn get_attachment_data(client: &Client, id: i32) -> Result<Item<AttachmentData>, HelpScoutError> {
-    let res = client.get(&format!("attachments/{}/data.json", id), None)?;
+    let res = client.get(&format!("attachments/{}/data.json", id), ())?;
     let attachment_data = serde_json::from_value(res.clone())?;
     Ok(attachment_data)
 }

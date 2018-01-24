@@ -36,7 +36,7 @@ pub fn list(client: &Client, page: Option<i32>, user_type: Option<UserType>) -> 
 }
 
 pub fn get(client: &Client, id: i32) -> Result<Item<User>, HelpScoutError> {
-    let res = client.get(&format!("users/{}.json", id), None)?;
+    let res = client.get(&format!("users/{}.json", id), ())?;
     let user = serde_json::from_value(res.clone())?;
     Ok(user)
 }
@@ -48,7 +48,7 @@ pub fn list_by_mailbox(client: &Client, mailbox_id: i32, page: Option<i32>, user
     Ok(users)
 }
 
-fn parse_params(page: Option<i32>, user_type: Option<UserType>) -> Option<Vec<(String, String)>> {
+fn parse_params(page: Option<i32>, user_type: Option<UserType>) -> Vec<(String, String)> {
     let mut params: Vec<(String, String)> = vec![];
 
     if let Some(page) = page {
@@ -61,14 +61,14 @@ fn parse_params(page: Option<i32>, user_type: Option<UserType>) -> Option<Vec<(S
                 params.push(("type".into(), value.to_string().replace("\"", "")));
             },
             Err(_) => {
-                return None
+                return vec![]
             }
         }
     }
 
     if params.len() > 0 {
-        Some(params)
+        params
     } else {
-        None
+        vec![]
     }
 }

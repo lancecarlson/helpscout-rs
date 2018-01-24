@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use client::Client;
 
 use error::HelpScoutError;
+use date_format::date_format;
 
 // Tags available for reporting
 #[derive(Debug, Deserialize)]
@@ -42,15 +43,17 @@ pub struct ReplyStatistics {
 }
 
 // Optionally set this previous time range to compare against
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
 pub struct PreviousRange {
     pub previous_start: Option<DateTime<Utc>>,
     pub previous_end: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct ConversationsReportBuilder {
+    #[serde(with = "date_format")]
     pub start: DateTime<Utc>,
+    #[serde(with = "date_format")]
     pub end: DateTime<Utc>,
     pub mailboxes: Option<String>,
     pub tags: Option<String>,
@@ -74,6 +77,7 @@ impl ConversationsReportBuilder {
     }
 
     pub fn params(&self) -> Option<Vec<(String, String)>> {
+
         let mut params: Vec<(String, String)> = vec![];
         params.push(("start".into(), format!("{:?}", self.start)));
         params.push(("end".into(), format!("{:?}", self.end)));
