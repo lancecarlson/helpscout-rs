@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use client::Client;
 
 use error::HelpScoutError;
-use date_format::date_format;
+use date_format::*;
 
 // Tags available for reporting
 #[derive(Debug, Deserialize)]
@@ -49,6 +49,7 @@ pub struct PreviousRange {
     pub previous_end: Option<DateTime<Utc>>,
 }
 
+#[serde(default)]
 #[derive(Debug, Serialize)]
 pub struct ConversationsReportBuilder {
     #[serde(with = "date_format")]
@@ -60,7 +61,11 @@ pub struct ConversationsReportBuilder {
     pub types: Option<String>,
     pub folders: Option<String>,
 
-    pub previous: Option<PreviousRange>,
+    // Only some reports want these
+    #[serde(with = "optional_date_format")]
+    pub previous_start: Option<DateTime<Utc>>,
+    #[serde(with = "optional_date_format")]
+    pub previous_end: Option<DateTime<Utc>>,
 }
 
 impl ConversationsReportBuilder {
@@ -72,20 +77,14 @@ impl ConversationsReportBuilder {
             tags: None,
             types: None,
             folders: None,
-            previous: None,
+            previous_start: None,
+            previous_end: None,
         }
     }
 
-    pub fn params(&self) -> Option<Vec<(String, String)>> {
-
-        let mut params: Vec<(String, String)> = vec![];
-        params.push(("start".into(), format!("{:?}", self.start)));
-        params.push(("end".into(), format!("{:?}", self.end)));
-        Some(params)
-    }
-
-    pub fn previous(&mut self, previous_start: Option<DateTime<Utc>>, previous_end: Option<DateTime<Utc>>) -> &ConversationsReportBuilder {
-        self.previous = Some(PreviousRange{previous_start, previous_end});
+    pub fn previous(&mut self, previous_start: DateTime<Utc>, previous_end: DateTime<Utc>) -> &ConversationsReportBuilder {
+        self.previous_start = Some(previous_start);
+        self.previous_end = Some(previous_end);
         self
     }
 }
