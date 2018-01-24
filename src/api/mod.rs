@@ -3,3 +3,4 @@ pub mod customers;
 pub mod mailboxes;
 pub mod users;
 pub mod person;
+pub mod reports;
