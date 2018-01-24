@@ -46,7 +46,7 @@ mod conversations {
         let mailboxes = mailboxes::list(&c).expect("Grab mailboxes for testing");
         let mailbox_ref = MailboxRef{id: mailboxes.items[0].id, name: "".into()};
         let users = users::list(&c, None, None).expect("Grab users for testing");
-        let customers = customers::list(&c).expect("Grab customers for testing");
+        let customers = customers::list(&c, None, None, None, None).expect("Grab customers for testing");
 
         println!("{:#?}", customers);
 
