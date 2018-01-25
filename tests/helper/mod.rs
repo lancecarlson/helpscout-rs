@@ -1,9 +1,9 @@
+
 use std::sync::{Once, ONCE_INIT};
 use std::env;
 
 use dotenv::dotenv;
 use env_logger;
-
 
 use super::helpscout::Client;
 

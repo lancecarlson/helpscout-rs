@@ -11,6 +11,9 @@ extern crate chrono;
 #[macro_use]
 extern crate log;
 
+// Make this enabled by webhook feature
+extern crate ring;
+
 mod error;
 pub use error::HelpScoutError;
 
@@ -23,3 +26,5 @@ pub use envelope::Collection;
 mod date_format;
 
 pub mod api;
+pub mod webhook;
+
