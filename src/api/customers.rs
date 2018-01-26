@@ -116,7 +116,7 @@ pub struct CustomerAddress {
     pub country: String,
     pub postal_code: String, 
     pub lines: Vec<String>, //Street address/apartment numbers, etc
-    pub created_at: DateTime<Utc    >,
+    pub created_at: DateTime<Utc>,
     pub modified_at: Option<DateTime<Utc>>,
 }
 
@@ -179,7 +179,7 @@ pub fn create(client: &Client, customer: &NewCustomer, reload: Option<bool>) -> 
     Ok(())
 }
 
-#[derive(Debug, Serialize)] //Not satisfied
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewCustomer {
     #[serde(rename = "type")]
@@ -198,10 +198,10 @@ pub struct NewCustomer {
 }
 
 impl NewCustomer {
-    pub fn new(first_name: String, last_name: String, emails: Vec<NewCustomerEmail>) -> NewCustomer {
+    pub fn new(first_name: &str, last_name: &str, emails: Vec<NewCustomerEmail>) -> NewCustomer {
         NewCustomer {
-            first_name: first_name,
-            last_name: last_name,
+            first_name: first_name.into(),
+            last_name: last_name.into(),
             emails: emails,
             organization: None,
             job_title: None,
@@ -213,6 +213,33 @@ impl NewCustomer {
             websites: None,
         }
     }
+
+    pub fn organization(&mut self, organization: &str) -> &mut NewCustomer {
+        self.organization = Some(organization.into());
+        self
+    }
+
+    pub fn job_title(&mut self, job_title: &str) -> &mut NewCustomer {
+        self.job_title = Some(job_title.into());
+        self
+    }
+
+    pub fn background(&mut self, background: &str) -> &mut NewCustomer {
+        self.background = Some(background.into());
+        self
+    }
+
+    pub fn send(&self, client: &Client) -> Result<(), HelpScoutError> {
+        //pub fn create(client: &Client, conversation: &NewConversation, imported: Option<bool>, auto_reply: Option<bool>, reload: Option<bool>) -> Result<(), HelpScoutError> {
+        let body = serde_json::to_value(self)?;
+        println!("{:?}", body);
+        let res = client.post("customers.json", (), Some(body.to_string()))?;
+        Ok(())
+    
+    }
+
+
+
 }
 
 #[derive(Debug, Default, Serialize)]
@@ -223,50 +250,18 @@ pub struct NewCustomerEmail {
 }
 
 impl NewCustomerEmail {
-    pub fn new(email: String, location: CustomerEmailLocationType) -> NewCustomerEmail {
+    pub fn new(email: &str, location: CustomerEmailLocationType) -> NewCustomerEmail {
         NewCustomerEmail {
-            value: email,
+            value: email.into(),
             location: location,
         }
     }
 }
 
-/*fn parse_params(first_name: Option<&str>,last_name: Option<&str>,email: Option<&str>, page: Option<i32> ) -> Option<Vec<(String, String)>> {
-    let mut params: Vec<(String, String)> = vec![];
-
-    if let Some(first_name) = first_name {
-        params.push(("firstName".into(), format!("{}", first_name)));
-    }
-
-    if let Some(last_name) = last_name {
-        params.push(("lastName".into(), format!("{}", last_name)));
-    }
-
-    if let Some(email) = email {
-        params.push(("email".into(), format!("{}", email)));
-    }
-
-    /*if let Some(modified_since) = modified_since {
-        params.push(("modifiedSince".into(), format!("{}", modified_since)));
-    }*/
-
-    if let Some(page) = page {
-        params.push(("page".into(), format!("{}", page)));
-    }
-
-    if params.len() > 0 {
-        Some(params)
-    } else {
-        None
-    }
-}*/
-
-//Reminder 
-
-
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CustomersListParamBuilder {
-
+    
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
@@ -274,27 +269,7 @@ pub struct CustomersListParamBuilder {
     pub modified_since: Option<DateTime<Utc>>,
     pub page: Option<i32>,
 }
-/*
-impl ConversationsReportBuilder {
-    pub fn new(start: DateTime<Utc>, end: DateTime<Utc>) -> ConversationsReportBuilder {
-        ConversationsReportBuilder {
-            start: start,
-            end: end,
-            mailboxes: None,
-            tags: None,
-            types: None,
-            folders: None,
-            previous_start: None,
-            previous_end: None,
-        }
-    }
 
-    pub fn previous(&mut self, previous_start: DateTime<Utc>, previous_end: DateTime<Utc>) -> &ConversationsReportBuilder {
-        self.previous_start = Some(previous_start);
-        self.previous_end = Some(previous_end);
-        self
-    }
-}*/
 impl CustomersListParamBuilder {
     pub fn new() -> CustomersListParamBuilder {
         CustomersListParamBuilder {
@@ -306,7 +281,7 @@ impl CustomersListParamBuilder {
         }
     }
 
-    pub fn first_name(&mut self, first_name: &str) -> &CustomersListParamBuilder {
+    pub fn first_name(&mut self, first_name: &str) -> &mut CustomersListParamBuilder {
         self.first_name = Some(first_name.into());
         self
     }
@@ -316,17 +291,17 @@ impl CustomersListParamBuilder {
         self
     }
 
-    pub fn email(&mut self, email: &str) -> &CustomersListParamBuilder {
+    pub fn email(&mut self, email: &str) -> &mut CustomersListParamBuilder {
         self.email = Some(email.into());
         self
     }
 
-    pub fn modified_since(&mut self, modified_since: DateTime<Utc>) -> &CustomersListParamBuilder {
+    pub fn modified_since(&mut self, modified_since: DateTime<Utc>) -> &mut CustomersListParamBuilder {
         self.modified_since = Some(modified_since);
         self
     }
 
-    pub fn page(&mut self, page: i32) -> &CustomersListParamBuilder {
+    pub fn page(&mut self, page: i32) -> &mut CustomersListParamBuilder {
         self.page = Some(page);
         self
     }
@@ -337,14 +312,9 @@ impl CustomersListParamBuilder {
     }
 
     pub fn send(&self, client: &Client) -> Result<Collection<Customer>, HelpScoutError> {
-    //println!("{:?}", param_builder);
-    let res = client.get("customers.json", self)?;
-    let customers = serde_json::from_value(res.clone())?;
-    Ok(customers)
+        let res = client.get("customers.json", &self)?;
+        let customers = serde_json::from_value(res.clone())?;
+        Ok(customers)
     }
 
-    /*pub fn previous(&mut self, previous_start: Option<DateTime<Utc>>, previous_end: Option<DateTime<Utc>>) -> &CustomersListParamBuilder {
-        self.previous = Some(PreviousRange{previous_start, previous_end});
-        self
-    }*/
 }

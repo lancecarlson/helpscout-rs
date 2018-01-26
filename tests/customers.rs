@@ -20,8 +20,8 @@ mod customers {
 
         let mut c = Client::new(&API_KEY);
         //println!("{:?}", param);
-        let customers = customers::list().last_name("Scout").page(1).send(&c).expect("Customers to be listed");
-        //println!("{:?}", customers.items[0]);
+        let customers = customers::list().page(1).last_name("Smith").send(&c).expect("Customers to be listed");
+        println!("{:?}", customers.items[0]);
         assert!(customers.items.len() > 0);
 
         let customer = customers::get(&c, customers.items[0].id).expect("To get a customer");
@@ -45,15 +45,21 @@ mod customers {
         assert!(customers.items.len() > 0);
     }
 
+    
     #[test]
     fn create() {
         dotenv().ok();
         let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
         let c = Client::new(&api_key);
 
-        let customer_email = NewCustomerEmail::new("guh@example.com".into(), CustomerEmailLocationType::Work);
-        let customer = NewCustomer::new("Mega".into(), "Dog".into(), vec![customer_email] );
-        println!("{:#?}", customer);
+        let customer_email = NewCustomerEmail::new("guh@example.com", CustomerEmailLocationType::Work);
+        //let customers = customers::list().last_name("Dog").page(1).send(&c).expect("Customers to be listed");
+        //println!("{:#?}", customers.items[0]);
+        let customer =  NewCustomer::new("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").send(&c).expect("The new customer to be posted");
+        
+        //let customers = customers::list().last_name("Dog").page(1).send(&c).expect("Customers to be listed");
+        //println!("{:#?}", customers.items[0]);
+        //println!("{:#?}", customer);
     }
 
 }

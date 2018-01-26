@@ -59,7 +59,8 @@ impl Client {
     /// by the library and not the user.
     pub fn post<T>(&self, path: &str, url_params: T, body: Option<String>) -> Result<Value, HelpScoutError>
         where T: serde::Serialize
-    {
+    {   
+        println!("{:?}", body);
         self.request(Method::Post, self.url(path, url_params)?, body)
     }
 
