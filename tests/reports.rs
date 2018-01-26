@@ -8,25 +8,19 @@ extern crate time;
 extern crate log;
 extern crate env_logger;
 
+mod helper;
+
 #[cfg(test)]
 mod reports {
-    use dotenv::dotenv;
-    use std::env;
     use chrono::prelude::*;
     use time::Duration;
-    use env_logger;
+    use helper;
 
-    use super::helpscout::Client;
     use super::helpscout::api::reports::{self};
 
     #[test]
-    fn list_and_get() {
-        dotenv().ok();
-        env_logger::init();
-        let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
-
-        let c = Client::new(&api_key);
-
+    fn conversations_overall() {
+        let c = helper::setup();
         let start = Utc::now() - Duration::days(1);
         let end = Utc::now();
         let builder = reports::ConversationsReportBuilder::new(start, end);
@@ -34,5 +28,28 @@ mod reports {
 
         //println!("{:?}", reports);
         assert!(reports.current.total_conversations > 0);
+
+        let prev_start = Utc::now() - Duration::days(2);
+        let prev_end = Utc::now() - Duration::days(1);
+
+        let builder = reports::ConversationsReportBuilder::new(start, end)
+            .previous(prev_start, prev_end);
+        let reports = reports::conversations_overall(&c, builder).expect("Grab reports for testing");
+
+        //println!("{:?}", reports);
+        // Didn't get a previous report?
+        //assert!(reports.previous.expect("To have a previous report").total_conversations > 0);
+    }
+
+    #[test]
+    fn conversations_busy_times() {
+        let c = helper::setup();
+        let start = Utc::now() - Duration::days(1);
+        let end = Utc::now();
+        let builder = reports::ConversationsReportBuilder::new(start, end);
+        let reports = reports::conversations_busy_times(&c, builder).expect("Grab reports for testing");
+
+        //println!("{:?}", reports);
+        assert_eq!(reports[0].day, 1);
     }
 }
