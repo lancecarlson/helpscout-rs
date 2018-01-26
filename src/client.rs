@@ -3,7 +3,7 @@ use std::io::Read;
 use std::time::Duration;
 
 use reqwest::{self, StatusCode, Method, Url};
-use reqwest::header::{Headers, Authorization, Basic};
+use reqwest::header::{Headers, Authorization, Basic, ContentType, Location};
 use serde;
 use serde_json::{self, Value};
 use serde_url_params;
@@ -60,7 +60,6 @@ impl Client {
     pub fn post<T>(&self, path: &str, url_params: T, body: Option<String>) -> Result<Value, HelpScoutError>
         where T: serde::Serialize
     {   
-        println!("{:?}", body);
         self.request(Method::Post, self.url(path, url_params)?, body)
     }
 
@@ -76,7 +75,6 @@ impl Client {
         Ok(Url::parse(&base)?)
     }
 
-    //T: What is going on at the start here?
     fn request(&self, method: Method, url: Url, request_body: Option<String>) -> Result<Value, HelpScoutError> {
         let mut count = self.retry_count;
         loop {
@@ -90,6 +88,7 @@ impl Client {
                 password: Some("X".into()),
             };
             headers.set(Authorization(credentials));
+            headers.set(ContentType::json());   
             let mut res = match request_body.clone() {
                 Some(b) => {
                     debug!("Request body - {}", b);
@@ -111,6 +110,7 @@ impl Client {
 
                     match res.status() {
                         StatusCode::Ok => return Ok(value),
+                        StatusCode::Created => return Ok(value),
                         StatusCode::BadRequest => return Err(HelpScoutError::BadRequest(status?)),
                         StatusCode::Unauthorized => return Err(HelpScoutError::UnauthorizedKey(status?)),
                         StatusCode::Forbidden => return Err(HelpScoutError::Forbidden(status?)),
@@ -121,18 +121,23 @@ impl Client {
                     };
                 },
                 Err(_) => {
-                    match res.status() {
-                        StatusCode::ServiceUnavailable => {
-                            count -= 1;
-                            if count == 0 {
-                                return Err(HelpScoutError::ServiceUnavailable);
-                            }
-                                else {
-                                    thread::sleep(Duration::from_millis(self.retry_wait.into()));
-                                    continue;
+                    debug!("response headers: {}",res.headers());
+                    if(res.headers().has::<Location>()) {
+                        return Ok(serde_json::Value::String("Created".into()));
+                    } else { 
+                            match res.status() {
+                            StatusCode::ServiceUnavailable => {
+                                count -= 1;
+                                if count == 0 {
+                                    return Err(HelpScoutError::ServiceUnavailable);
                                 }
-                        },
-                        _ => return Err(HelpScoutError::InvalidServerResponse),
+                                    else {
+                                        thread::sleep(Duration::from_millis(self.retry_wait.into()));
+                                        continue;
+                                    }
+                            },
+                            _ => return Err(HelpScoutError::InvalidServerResponse),
+                        }
                     }
                 },
             };

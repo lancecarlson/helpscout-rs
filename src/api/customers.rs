@@ -32,7 +32,7 @@ pub enum CustomerEmailLocationType {
 }
 
 impl Default for CustomerEmailLocationType {
-    fn default() -> CustomerEmailLocationType { CustomerEmailLocationType::Work}
+    fn default() -> CustomerEmailLocationType {CustomerEmailLocationType::Work}
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -156,7 +156,7 @@ pub struct CustomerWebsite {
 }
 
 pub fn list() -> CustomersListParamBuilder {
-    let mut param_builder = CustomersListParamBuilder::new();
+    let param_builder = CustomersListParamBuilder::new();
     //println!("{:?}", param_builder);
     param_builder
 }
@@ -198,7 +198,7 @@ pub struct NewCustomer {
 }
 
 impl NewCustomer {
-    pub fn new(first_name: &str, last_name: &str, emails: Vec<NewCustomerEmail>) -> NewCustomer {
+    pub fn create(first_name: &str, last_name: &str, emails: Vec<NewCustomerEmail>) -> NewCustomer {
         NewCustomer {
             first_name: first_name.into(),
             last_name: last_name.into(),
@@ -230,9 +230,8 @@ impl NewCustomer {
     }
 
     pub fn send(&self, client: &Client) -> Result<(), HelpScoutError> {
-        //pub fn create(client: &Client, conversation: &NewConversation, imported: Option<bool>, auto_reply: Option<bool>, reload: Option<bool>) -> Result<(), HelpScoutError> {
         let body = serde_json::to_value(self)?;
-        println!("{:?}", body);
+        //println!("{:?}", body);
         let res = client.post("customers.json", (), Some(body.to_string()))?;
         Ok(())
     
@@ -273,11 +272,11 @@ pub struct CustomersListParamBuilder {
 impl CustomersListParamBuilder {
     pub fn new() -> CustomersListParamBuilder {
         CustomersListParamBuilder {
-            first_name:None,
-            last_name:None,
-            email:None,
-            modified_since:None,
-            page:None,
+            first_name: None,
+            last_name: None,
+            email: None,
+            modified_since: None,
+            page: None,
         }
     }
 
@@ -307,7 +306,7 @@ impl CustomersListParamBuilder {
     }
 
     pub fn params(&self) -> Option<Vec<(String, String)>> {
-        let mut params: Vec<(String, String)> = vec![];
+        let params: Vec<(String, String)> = vec![];
         Some(params)
     }
 
