@@ -5,6 +5,8 @@ use client::Client;
 use error::HelpScoutError;
 use date_format::*;
 
+use super::ReportBuilder;
+
 // Tags available for reporting
 #[derive(Debug, Deserialize)]
 pub struct FilterTag {
@@ -70,53 +72,6 @@ pub struct CustomFieldSummary {
     pub unanswered_percent: f64,
 }
 
-// Optionally set this previous time range to compare against
-#[derive(Debug, Default, Serialize)]
-pub struct PreviousRange {
-    pub previous_start: Option<DateTime<Utc>>,
-    pub previous_end: Option<DateTime<Utc>>,
-}
-
-#[serde(default)]
-#[derive(Debug, Serialize)]
-pub struct ConversationsReportBuilder {
-    #[serde(with = "date_format")]
-    pub start: DateTime<Utc>,
-    #[serde(with = "date_format")]
-    pub end: DateTime<Utc>,
-    pub mailboxes: Option<String>,
-    pub tags: Option<String>,
-    pub types: Option<String>,
-    pub folders: Option<String>,
-
-    // Only some reports want these
-    #[serde(with = "optional_date_format")]
-    pub previous_start: Option<DateTime<Utc>>,
-    #[serde(with = "optional_date_format")]
-    pub previous_end: Option<DateTime<Utc>>,
-}
-
-impl ConversationsReportBuilder {
-    pub fn new(start: DateTime<Utc>, end: DateTime<Utc>) -> ConversationsReportBuilder {
-        ConversationsReportBuilder {
-            start: start,
-            end: end,
-            mailboxes: None,
-            tags: None,
-            types: None,
-            folders: None,
-            previous_start: None,
-            previous_end: None,
-        }
-    }
-
-    pub fn previous(mut self, previous_start: DateTime<Utc>, previous_end: DateTime<Utc>) -> ConversationsReportBuilder {
-        self.previous_start = Some(previous_start);
-        self.previous_end = Some(previous_end);
-        self
-    }
-}
-
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConversationsReport {
@@ -170,14 +125,87 @@ pub struct BusyTimeStatistics {
     pub count: i32,
 }
 
-pub fn conversations_overall(client: &Client, builder: ConversationsReportBuilder) -> Result<ConversationsReport, HelpScoutError> {
-    let res = client.get("reports/conversations.json", builder)?;
-    let conversations = serde_json::from_value(res.clone())?;
-    Ok(conversations)
+// Optionally set this previous time range to compare against
+#[derive(Debug, Default, Serialize)]
+pub struct PreviousRange {
+    pub previous_start: Option<DateTime<Utc>>,
+    pub previous_end: Option<DateTime<Utc>>,
 }
 
-pub fn conversations_busy_times(client: &Client, builder: ConversationsReportBuilder) -> Result<Vec<BusyTimeStatistics>, HelpScoutError> {
-    let res = client.get("reports/conversations/busy-times.json", builder)?;
-    let conversations = serde_json::from_value(res.clone())?;
-    Ok(conversations)
+#[serde(default)]
+#[derive(Debug, Serialize)]
+pub struct ConversationsReportBuilder {
+    #[serde(with = "date_format")]
+    pub start: DateTime<Utc>,
+    #[serde(with = "date_format")]
+    pub end: DateTime<Utc>,
+
+    pub mailboxes: Option<String>,
+    pub tags: Option<String>,
+    pub types: Option<String>,
+    pub folders: Option<String>,
+
+    // Only some reports want these
+    #[serde(with = "optional_date_format")]
+    pub previous_start: Option<DateTime<Utc>>,
+    #[serde(with = "optional_date_format")]
+    pub previous_end: Option<DateTime<Utc>>,
 }
+
+impl ConversationsReportBuilder {
+    /* Set methods */
+    pub fn set_mailboxes(mut self, mailboxes: String) -> Self {
+        self.mailboxes = Some(mailboxes);
+        self
+    }
+
+    pub fn set_tags(mut self, tags: String) -> Self {
+        self.tags = Some(tags);
+        self
+    }
+
+    pub fn set_types(mut self, types: String) -> Self {
+        self.types = Some(types);
+        self
+    }
+
+    pub fn set_folders(mut self, folders: String) -> Self {
+        self.folders = Some(folders);
+        self
+    }
+
+    pub fn set_previous(mut self, previous_start: DateTime<Utc>, previous_end: DateTime<Utc>) -> Self {
+        self.previous_start = Some(previous_start);
+        self.previous_end = Some(previous_end);
+        self
+    }
+
+    /* Run reports */
+    pub fn overall(self, client: &Client) -> Result<ConversationsReport, HelpScoutError> {
+        let res = client.get("reports/conversations.json", self)?;
+        let conversations = serde_json::from_value(res.clone())?;
+        Ok(conversations)
+    }
+
+    pub fn busy_times(self, client: &Client) -> Result<Vec<BusyTimeStatistics>, HelpScoutError> {
+        let res = client.get("reports/conversations/busy-times.json", self)?;
+        let stats = serde_json::from_value(res.clone())?;
+        Ok(stats)
+    }
+}
+
+impl From<ReportBuilder> for ConversationsReportBuilder {
+    fn from(report: ReportBuilder) -> Self {
+        ConversationsReportBuilder {
+            start: report.start,
+            end: report.end,
+            mailboxes: None,
+            tags: None,
+            types: None,
+            folders: None,
+            previous_start: None,
+            previous_end: None,
+        }
+    }
+}
+
