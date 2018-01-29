@@ -10,7 +10,7 @@ mod customers {
     use uuid::Uuid;
 
     use super::helpscout::{Client, HelpScoutError};
-    use super::helpscout::api::customers::{self, CustomerEmailLocationType, NewCustomer, NewCustomerEmail};
+    use super::helpscout::api::customers::{self, CustomerEmailLocationType, NewCustomer, NewCustomerEmail, NewCustomerSocialProfiles, CustomerSocialProfileType};
     use super::helpscout::api::mailboxes::{self};
 
 
@@ -53,11 +53,12 @@ mod customers {
         dotenv().ok();
         let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
         let c = Client::new(&api_key);
-
+        
         let random_email_string = format!("guh{}@example.com", Uuid::new_v4());
         let customer_email = NewCustomerEmail::new(&random_email_string, CustomerEmailLocationType::Work);
-        //println!("{:#?}", customers.items[0]);
-        let customer =  NewCustomer::create("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").send(&c).expect("The new customer to be posted");
+        let customer_social_profile = vec![NewCustomerSocialProfiles::new("https://twitter.com/TwaikuGC", CustomerSocialProfileType::Twitter)];  
+        
+        let customer =  NewCustomer::create("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").social_profiles(customer_social_profile).send(&c).expect("The new customer to be posted");
         
         let customers = customers::list().last_name("Dog").page(1).send(&c).expect("Customers to be listed");
         assert!(customers.items.len() > 0);

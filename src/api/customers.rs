@@ -189,11 +189,11 @@ pub struct NewCustomer {
     pub organization: Option<String>,
     pub job_title: Option<String>,
     pub background: Option<String>,
-    pub address: Option<CustomerAddress>,
-    pub social_profiles: Option<Vec<CustomerSocialProfiles>>,
-    pub phones: Option<Vec<CustomerPhone>>,
-    pub chats: Option<Vec<CustomerChat>>,
-    pub websites: Option<Vec<CustomerWebsite>>,
+    pub address: Option<NewCustomerAddress>,
+    pub social_profiles: Option<Vec<NewCustomerSocialProfiles>>,
+    pub phones: Option<Vec<NewCustomerPhone>>,
+    pub chats: Option<Vec<NewCustomerChat>>,
+    pub websites: Option<Vec<NewCustomerWebsite>>,
 
 }
 
@@ -229,6 +229,31 @@ impl NewCustomer {
         self
     }
 
+    pub fn address(&mut self, address: NewCustomerAddress) -> &mut NewCustomer {
+        self.address = Some(address);
+        self
+    }
+
+    pub fn social_profiles(&mut self, social_profiles: Vec<NewCustomerSocialProfiles>) -> &mut NewCustomer {
+        self.social_profiles = Some(social_profiles);
+        self
+    }
+
+    pub fn phones(&mut self, phones: Vec<NewCustomerPhone>) -> &mut NewCustomer {
+        self.phones = Some(phones);
+        self
+    }
+
+    pub fn chats(&mut self, chats: Vec<NewCustomerChat>) -> &mut NewCustomer {
+        self.chats = Some(chats);
+        self
+    }
+
+    pub fn websites(&mut self, websites: Vec<NewCustomerWebsite>) -> &mut NewCustomer {
+        self.websites = Some(websites);
+        self
+    }
+
     pub fn send(&self, client: &Client) -> Result<(), HelpScoutError> {
         let body = serde_json::to_value(self)?;
         //println!("{:?}", body);
@@ -236,9 +261,6 @@ impl NewCustomer {
         Ok(())
     
     }
-
-
-
 }
 
 #[derive(Debug, Default, Serialize)]
@@ -259,8 +281,95 @@ impl NewCustomerEmail {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct NewCustomerAddress {
+    pub city: String,
+    pub state: String,
+    pub country: String,
+    pub postal_code: String, 
+    pub lines: Vec<String>, //Street address/apartment numbers, etc
+    #[serde(with = "date_format")]
+    pub created_at: DateTime<Utc>,
+}
+
+impl NewCustomerAddress {
+    pub fn new(city: &str, state: &str, country: &str, postal_code: &str, lines: Vec<String>, created_at: DateTime<Utc>) -> NewCustomerAddress {
+        NewCustomerAddress {
+            city: city.into(),
+            state: state.into(),
+            country: country.into(),
+            postal_code: postal_code.into(),
+            lines: lines,
+            created_at: created_at,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewCustomerPhone {
+    pub value: String,
+    pub location: CustomerPhoneLocationType,
+}
+
+impl NewCustomerPhone {
+    pub fn new(value: &str, location: CustomerPhoneLocationType) -> NewCustomerPhone {
+        NewCustomerPhone {
+            value: value.into(),
+            location: location,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewCustomerSocialProfiles {
+    pub value: String,
+    pub type_: CustomerSocialProfileType,
+}
+
+impl NewCustomerSocialProfiles {
+    pub fn new(value: &str, type_: CustomerSocialProfileType) -> NewCustomerSocialProfiles {
+        NewCustomerSocialProfiles {
+            value: value.into(),
+            type_: type_,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewCustomerChat {
+    pub value: String,
+    pub type_: CustomerChatType,
+}
+
+impl NewCustomerChat {
+    pub fn new(value: &str, type_: CustomerChatType) -> NewCustomerChat {
+        NewCustomerChat {
+            value: value.into(),
+            type_: type_,
+        }
+    }
+}
+
+#[derive(Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewCustomerWebsite {
+    pub value: String,
+}
+
+impl NewCustomerWebsite {
+    pub fn new(value: &str) -> NewCustomerWebsite {
+        NewCustomerWebsite {
+            value: value.into(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CustomersListParamBuilder {
-    
+
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
