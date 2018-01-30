@@ -5,14 +5,14 @@ use error::HelpScoutError;
 use client::Client;
 use envelope::{Collection, Item};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum UserType {
     Team,
     User
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Copy, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: i32,
