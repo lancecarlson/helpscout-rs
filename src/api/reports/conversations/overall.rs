@@ -1,3 +1,131 @@
+//! Conversations Overall Report
+//!
+//! API docs: <https://developer.helpscout.com/help-desk-api/reports/conversations/conversations/>
+//!
+//! ## Usage
+//!
+//! ```rust
+//! extern crate helpscout;
+//! extern crate chrono;
+//! extern crate time;
+//!
+//! use chrono::prelude::*;
+//! use time::Duration;
+//!
+//! use helpscout::HelpScoutError;
+//! use helpscout::api::report;
+//! use helpscout::api::reports::conversations::overall::ConversationsReport;
+//!
+//! fn main() {
+//!     let report = overall_report().expect("run conversations overall report");
+//!     println!("{:#?}", report);
+//!     assert!(report.current.customers > 0);
+//! }
+//!
+//! fn overall_report() -> Result<ConversationsReport, HelpScoutError> {
+//!     let client = helpscout::Client::example();
+//!     let start = Utc::now() - Duration::days(1);
+//!     let end = Utc::now();
+//!     report(start, end)
+//!         .conversations()
+//!         .overall(&client)
+//! }
+//! ```
+//!
+//! ## Output
+//!
+//! ```rust,ignore
+//! ConversationsReport {
+//!     filter_tags: [
+//!        FilterTag {
+//!            id: 123,
+//!            name: ""
+//!        },
+//!        // More
+//!     ],
+//!     company_id: None,
+//!     busiest_day: BusyTimeStatistics {
+//!         day: 3,
+//!         hour: 0,
+//!         count: 22
+//!     },
+//!     busiest_time_start: None,
+//!     busiest_time_end: None,
+//!     current: ConversationsTimeRangeStatistics {
+//!         start_date: 2018-01-30T18:41:25Z,
+//!         end_date: 2018-01-31T18:41:25Z,
+//!         total_conversations: 51,
+//!         conversations_created: 21,
+//!         new_conversations: 31,
+//!         customers: 10,
+//!         conversations_per_day: 10
+//!     },
+//!     previous: None,
+//!     delta: None,
+//!     tags: TopStatistics {
+//!         count: 20,
+//!         top: [
+//!             Statistics {
+//!                 id: 1,
+//!                 name: Some("tag a"),
+//!                 count: 51,
+//!                 previous_count: None,
+//!                 percent: 39.56043956043956,
+//!                 previous_percent: None,
+//!                 delta_percent: None,
+//!             },
+//!             // More
+//!         ]
+//!     },
+//!     customers: TopStatistics {
+//!         count: 1816,
+//!         top: [
+//!             Statistics {
+//!                 id: 1,
+//!                 name: "John Smith",
+//!                 count: 31,
+//!                 previous_count: None,
+//!                 percent: 42.22222222222222,
+//!                 previous_percent: None,
+//!                 delta_percent: None,
+//!             },
+//!             // More
+//!         ]
+//!     },
+//!     replies: TopStatistics {
+//!         count: 109,
+//!         top: [
+//!             ReplyStatistics {
+//!                 id: 1,
+//!                 name: "Saved reply",
+//!                 mailbox_id: 1,
+//!                 count: 16,
+//!                 prevous_count: None,
+//!                 percent: 0.88105726872247,
+//!                 previous_percent: None,
+//!                 delta_percent: None,
+//!             },
+//!             // More
+//!         ]
+//!     },
+//!     workflows: TopStatistics {
+//!         count: 240,
+//!         top: [
+//!             Statistics {
+//!                 id: 1,
+//!                 name: Some("workflow 1"),
+//!                 count: 36,
+//!                 previous_count: None,
+//!                 percent: 40.0,
+//!                 previous_percent: None,
+//!                 delta_percent: None,
+//!             },
+//!             // More
+//!         ]
+//!     }
+//! }
+//! ```
+
 use serde_json;
 
 use chrono::{DateTime, Utc};
@@ -58,133 +186,6 @@ pub struct ReplyStatistics {
 }
 
 impl ConversationsReportBuilder {
-    /// Conversations Overall Report
-    ///
-    /// API docs: <https://developer.helpscout.com/help-desk-api/reports/conversations/conversations/>
-    ///
-    /// ## Usage
-    ///
-    /// ```rust
-    /// extern crate helpscout;
-    /// extern crate chrono;
-    /// extern crate time;
-    ///
-    /// use chrono::prelude::*;
-    /// use time::Duration;
-    ///
-    /// use helpscout::HelpScoutError;
-    /// use helpscout::api::report;
-    /// use helpscout::api::reports::conversations::overall::ConversationsReport;
-    ///
-    /// fn main() {
-    ///     let report = overall_report().expect("run conversations overall report");
-    ///     println!("{:#?}", report);
-    ///     assert!(report.current.customers > 0);
-    /// }
-    ///
-    /// fn overall_report() -> Result<ConversationsReport, HelpScoutError> {
-    ///     let client = helpscout::Client::example();
-    ///     let start = Utc::now() - Duration::days(1);
-    ///     let end = Utc::now();
-    ///     report(start, end)
-    ///         .conversations()
-    ///         .overall(&client)
-    /// }
-    /// ```
-    ///
-    /// ## Output
-    ///
-    /// ```rust,ignore
-    /// ConversationsReport {
-    ///     filter_tags: [
-    ///        FilterTag {
-    ///            id: 123,
-    ///            name: ""
-    ///        },
-    ///        // More
-    ///     ],
-    ///     company_id: None,
-    ///     busiest_day: BusyTimeStatistics {
-    ///         day: 3,
-    ///         hour: 0,
-    ///         count: 22
-    ///     },
-    ///     busiest_time_start: None,
-    ///     busiest_time_end: None,
-    ///     current: ConversationsTimeRangeStatistics {
-    ///         start_date: 2018-01-30T18:41:25Z,
-    ///         end_date: 2018-01-31T18:41:25Z,
-    ///         total_conversations: 51,
-    ///         conversations_created: 21,
-    ///         new_conversations: 31,
-    ///         customers: 10,
-    ///         conversations_per_day: 10
-    ///     },
-    ///     previous: None,
-    ///     delta: None,
-    ///     tags: TopStatistics {
-    ///         count: 20,
-    ///         top: [
-    ///             Statistics {
-    ///                 id: 1,
-    ///                 name: Some("tag a"),
-    ///                 count: 51,
-    ///                 previous_count: None,
-    ///                 percent: 39.56043956043956,
-    ///                 previous_percent: None,
-    ///                 delta_percent: None,
-    ///             },
-    ///             // More
-    ///         ]
-    ///     },
-    ///     customers: TopStatistics {
-    ///         count: 1816,
-    ///         top: [
-    ///             Statistics {
-    ///                 id: 1,
-    ///                 name: "John Smith",
-    ///                 count: 31,
-    ///                 previous_count: None,
-    ///                 percent: 42.22222222222222,
-    ///                 previous_percent: None,
-    ///                 delta_percent: None,
-    ///             },
-    ///             // More
-    ///         ]
-    ///     },
-    ///     replies: TopStatistics {
-    ///         count: 109,
-    ///         top: [
-    ///             ReplyStatistics {
-    ///                 id: 1,
-    ///                 name: "Saved reply",
-    ///                 mailbox_id: 1,
-    ///                 count: 16,
-    ///                 prevous_count: None,
-    ///                 percent: 0.88105726872247,
-    ///                 previous_percent: None,
-    ///                 delta_percent: None,
-    ///             },
-    ///             // More
-    ///         ]
-    ///     },
-    ///     workflows: TopStatistics {
-    ///         count: 240,
-    ///         top: [
-    ///             Statistics {
-    ///                 id: 1,
-    ///                 name: Some("workflow 1"),
-    ///                 count: 36,
-    ///                 previous_count: None,
-    ///                 percent: 40.0,
-    ///                 previous_percent: None,
-    ///                 delta_percent: None,
-    ///             },
-    ///             // More
-    ///         ]
-    ///     }
-    /// }
-    /// ```
     pub fn overall(self, client: &Client) -> Result<ConversationsReport, HelpScoutError> {
         let res = client.get("reports/conversations.json", self)?;
         let conversations = serde_json::from_value(res.clone())?;
