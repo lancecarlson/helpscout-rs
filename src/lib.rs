@@ -1,8 +1,8 @@
-//! Helpscout API Bindings in Rust Documentation
+//! Help Scout API Bindings in Rust Documentation
 //!
-//! Helpscout References:
+//! Help Scout References:
 //! * [Developer Docs](https://developer.helpscout.com/)
-//! * [Helpdesk API](https://developer.helpscout.com/help-desk-api/)
+//! * [Help Desk API](https://developer.helpscout.com/help-desk-api/)
 //!
 //! Note: the api module implements the Help Desk API.
 //!
