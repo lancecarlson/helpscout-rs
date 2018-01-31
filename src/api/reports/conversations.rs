@@ -6,13 +6,7 @@ use error::HelpScoutError;
 use date_format::*;
 
 use super::ReportBuilder;
-
-// Tags available for reporting
-#[derive(Debug, Deserialize)]
-pub struct FilterTag {
-    pub id: i32,
-    pub name: String,
-}
+use api::reports::FilterTag;
 
 #[derive(Debug, Deserialize)]
 pub struct TopStatistics<T> {
