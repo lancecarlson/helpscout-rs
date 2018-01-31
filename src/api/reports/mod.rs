@@ -2,7 +2,6 @@ pub mod conversations;
 
 use chrono::{DateTime, Utc};
 
-use error::HelpScoutError;
 use self::conversations::ConversationsReportBuilder;
 
 #[derive(Debug, Clone)]
