@@ -122,7 +122,7 @@ impl Client {
                 },
                 Err(_) => {
                     debug!("response headers: {}",res.headers());
-                    if(res.headers().has::<Location>()) {
+                    if res.headers().has::<Location>() {
                         return Ok(serde_json::Value::String("Created".into()));
                     } else { 
                             match res.status() {
