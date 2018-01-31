@@ -8,13 +8,16 @@ use date_format::*;
 use super::ReportBuilder;
 use api::reports::FilterTag;
 
-#[derive(Debug, Deserialize)]
+pub mod overall;
+pub mod busy_times;
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct TopStatistics<T> {
     pub count: i64,
     pub top: Vec<T>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Statistics {
     pub id: i64,
@@ -24,18 +27,6 @@ pub struct Statistics {
     pub percent: f64,
     pub previous_percent: Option<f64>,
     pub delta_percent: Option<f64>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ReplyStatistics {
-    pub name: Option<String>,
-    pub count: i64,
-    pub previous_count: i64,
-    pub percent: f64,
-    pub previous_percent: f64,
-    pub delta_percent: f64,
-    pub mailbox_id: i32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,53 +57,7 @@ pub struct CustomFieldSummary {
     pub unanswered_percent: f64,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ConversationsReport {
-    pub filter_tags: Vec<FilterTag>,
-    pub company_id: Option<i64>,
-    pub busiest_day: BusiestDay,
-    pub busiest_time_start: Option<i32>,
-    pub busiest_time_end: Option<i32>,
-    pub current: ConversationsTimeRangeStatistics,
-    pub previous: Option<ConversationsTimeRangeStatistics>,
-    pub delta: Option<ConversationsMultipleTimeRangeStatistics>,
-    pub tags: TopStatistics<Statistics>,
-    pub customers: TopStatistics<Statistics>,
-    pub replies: TopStatistics<ReplyStatistics>,
-    pub workflows: TopStatistics<Statistics>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct BusiestDay {
-    pub day: i32,
-    pub hour: i32,
-    pub count: i32,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ConversationsTimeRangeStatistics {
-    pub start_date: DateTime<Utc>,
-    pub end_date: DateTime<Utc>,
-    pub total_conversations: i64,
-    pub conversations_created: i64,
-    pub new_conversations: i64,
-    pub customers: i64,
-    pub conversations_per_day: i64,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ConversationsMultipleTimeRangeStatistics {
-    pub total_conversations: f64,
-    pub conversations_created: f64,
-    pub new_conversations: f64,
-    pub customers: f64,
-    pub conversations_per_day: f64,
-}
-
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct BusyTimeStatistics {
     pub day: i32,
     pub hour: i32,
@@ -172,19 +117,6 @@ impl ConversationsReportBuilder {
         self.previous_start = Some(previous_start);
         self.previous_end = Some(previous_end);
         self
-    }
-
-    /* Run reports */
-    pub fn overall(self, client: &Client) -> Result<ConversationsReport, HelpScoutError> {
-        let res = client.get("reports/conversations.json", self)?;
-        let conversations = serde_json::from_value(res.clone())?;
-        Ok(conversations)
-    }
-
-    pub fn busy_times(self, client: &Client) -> Result<Vec<BusyTimeStatistics>, HelpScoutError> {
-        let res = client.get("reports/conversations/busy-times.json", self)?;
-        let stats = serde_json::from_value(res.clone())?;
-        Ok(stats)
     }
 }
 

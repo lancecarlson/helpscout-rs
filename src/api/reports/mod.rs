@@ -1,3 +1,15 @@
+//! Help Scout Reports
+//!
+//! There are several different categories of reports. We've broken them
+//! down into separate modules. Each category has several reports scoped
+//! to that topic.
+//!
+//! - [Conversations](conversations/index.html)
+//! - Docs (TODO)
+//! - Happiness (TODO)
+//! - Productivity (TODO)
+//! - Company (TODO)
+//! - User (TODO)
 pub mod conversations;
 
 use chrono::{DateTime, Utc};
