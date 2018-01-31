@@ -1,5 +1,11 @@
 //! Helpscout API Bindings in Rust Documentation
 //!
+//! Helpscout References:
+//! * [Developer Docs](https://developer.helpscout.com/)
+//! * [Helpdesk API](https://developer.helpscout.com/help-desk-api/)
+//!
+//! Note: the api module implements the Help Desk API.
+//!
 //! ## Usage
 //!
 //! Add the dependency to your Cargo.toml:
