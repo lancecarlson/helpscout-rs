@@ -1,3 +1,4 @@
+//! Mailbox Endpoints
 use serde_json;
 use chrono::{DateTime, Utc};
 
