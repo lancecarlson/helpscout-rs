@@ -1,8 +1,5 @@
-use serde_json;
 use chrono::{DateTime, Utc};
-use client::Client;
 
-use error::HelpScoutError;
 use date_format::*;
 
 use super::ReportBuilder;

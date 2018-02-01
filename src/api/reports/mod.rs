@@ -9,12 +9,14 @@
 //! - Happiness (TODO)
 //! - Productivity (TODO)
 //! - Company (TODO)
-//! - User (TODO)
+//! - [User](user/index.html)
 pub mod conversations;
+pub mod user;
 
 use chrono::{DateTime, Utc};
 
 use self::conversations::ConversationsReportBuilder;
+use self::user::UserReportBuilder;
 
 #[derive(Debug, Clone)]
 pub struct ReportBuilder {
@@ -31,6 +33,10 @@ impl ReportBuilder {
     }
 
     pub fn conversations(self) -> ConversationsReportBuilder {
+        self.into()
+    }
+
+    pub fn user(self) -> UserReportBuilder {
         self.into()
     }
 }

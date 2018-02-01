@@ -14,7 +14,7 @@ mod conversations {
     use super::helpscout::api::customers::{self};
     use super::helpscout::api::conversations::{self, ConversationThreadType, NewConversation, NewConversationThread};
 
-    #[test]
+/*    #[test]
     fn list_and_get() {
         dotenv().ok();
         let api_key: String = env::var("API_KEY").expect("to have API_KEY set");
@@ -61,5 +61,5 @@ mod conversations {
         let conversation = NewConversation::new(customer, "TESTING FROM RUST LIBRARY".into(), mailbox_ref, vec![thread]);
 
         println!("{:#?}", conversation);
-    }
+    }*/
 }
