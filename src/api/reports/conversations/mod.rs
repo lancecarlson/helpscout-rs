@@ -3,7 +3,6 @@ use chrono::{DateTime, Utc};
 use date_format::*;
 
 use super::ReportBuilder;
-use api::reports::FilterTag;
 
 pub mod overall;
 pub mod busy_times;

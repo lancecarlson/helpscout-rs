@@ -131,7 +131,8 @@ use chrono::{DateTime, Utc};
 
 use client::Client;
 use error::HelpScoutError;
-use super::{ConversationsReportBuilder, FilterTag, TopStatistics, Statistics, BusyTimeStatistics};
+use api::reports::FilterTag;
+use super::{ConversationsReportBuilder, TopStatistics, Statistics, BusyTimeStatistics};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
