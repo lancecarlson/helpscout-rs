@@ -55,6 +55,14 @@ impl ProductivityReportBuilder {
         self.previous_end = Some(previous_end);
         self
     }
+
+    pub fn office_hours(mut self, office_hours: bool) -> Self {
+        self.office_hours = Some(match office_hours {
+            true => 1,
+            false => 0,
+        });
+        self
+    }
 }
 
 impl From<ReportBuilder> for ProductivityReportBuilder {
