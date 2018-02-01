@@ -6,7 +6,7 @@ use error::HelpScoutError;
 use client::Client;
 use envelope::{Collection, Item};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerSocialProfileType {
     Twitter,
@@ -23,7 +23,7 @@ pub enum CustomerSocialProfileType {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerEmailLocationType {
     Home,
@@ -35,7 +35,7 @@ impl Default for CustomerEmailLocationType {
     fn default() -> CustomerEmailLocationType {CustomerEmailLocationType::Work}
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerChatType {
     Aim,
@@ -49,7 +49,7 @@ pub enum CustomerChatType {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerPhoneLocationType {
     Home,
@@ -60,7 +60,7 @@ pub enum CustomerPhoneLocationType {
     Other,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerPhotoType {
     Unknown,
@@ -72,7 +72,7 @@ pub enum CustomerPhotoType {
     Linkedin,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerGender {
     Male,
@@ -80,11 +80,10 @@ pub enum CustomerGender {
     Unknown,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Customer {
     pub id: i32,
-    #[serde(rename = "type")]
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub full_name: Option<String>,
@@ -107,10 +106,10 @@ pub struct Customer {
     pub websites: Option<Vec<CustomerWebsite>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CustomerAddress {
-    pub id: i32,
+    pub id: Option<i32>,
     pub city: String,
     pub state: String,
     pub country: String,
@@ -120,39 +119,103 @@ pub struct CustomerAddress {
     pub modified_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl CustomerAddress {
+    pub fn new(city: &str, state: &str, country: &str, postal_code: &str, lines: Vec<String>, created_at: DateTime<Utc>) -> CustomerAddress {
+        CustomerAddress {
+            id: None,
+            city: city.into(),
+            state: state.into(),
+            country: country.into(),
+            postal_code: postal_code.into(),
+            lines: lines,
+            created_at: created_at,
+            modified_at: None,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CustomerSocialProfiles {
-    pub id: i32,
+    pub id: Option<i32>,
     pub value: String,
     pub type_: CustomerSocialProfileType,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl CustomerSocialProfiles {
+    pub fn new(value: &str, type_: CustomerSocialProfileType) -> CustomerSocialProfiles {
+        CustomerSocialProfiles {
+            id: None,
+            value: value.into(),
+            type_: type_,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct CustomerEmail {
-    pub id: i32,
+    pub id: Option<i32>,
     pub value: String,
     pub location: CustomerEmailLocationType,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl CustomerEmail {
+    pub fn new(email: &str, location: CustomerEmailLocationType) -> CustomerEmail {
+        CustomerEmail {
+            id: None,
+            value: email.into(),
+            location: location,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct CustomerPhone {
-    pub id: i32,
+    pub id: Option<i32>,
     pub value: String,
     pub location: CustomerPhoneLocationType,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CustomerChat {
-    pub id: i32,
-    pub value: String,
-    pub location: CustomerChatType,
+impl CustomerPhone {
+    pub fn new(value: &str, location: CustomerPhoneLocationType) -> CustomerPhone {
+        CustomerPhone {
+            id: None,
+            value: value.into(),
+            location: location,
+        }
+    }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CustomerWebsite {
-    pub id: i32,
+#[derive(Debug, Serialize, Clone, Deserialize)]
+pub struct CustomerChat {
+    pub id: Option<i32>,
     pub value: String,
+    pub type_: CustomerChatType,
+}
+
+impl CustomerChat {
+    pub fn new(value: &str, type_: CustomerChatType) -> CustomerChat {
+        CustomerChat {
+            id: None,
+            value: value.into(),
+            type_: type_,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Deserialize)]
+pub struct CustomerWebsite {
+    pub id: Option<i32>,
+    pub value: String,
+}
+
+impl CustomerWebsite {
+    pub fn new(value: &str) -> CustomerWebsite {
+        CustomerWebsite {
+            id: None,
+            value: value.into(),
+        }
+    }
 }
 
 pub fn list() -> CustomersListParamBuilder {
@@ -172,11 +235,16 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
     let customer = serde_json::from_value(res.clone())?;
     Ok(customer)
 }
+pub fn create (first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> NewCustomer {
+    let new_customer = NewCustomer::new(first_name, last_name, emails);
+    new_customer
+}
 
-pub fn create(client: &Client, customer: &NewCustomer, reload: Option<bool>) -> Result<(), HelpScoutError> {
-    let body = serde_json::to_value(customer)?;
-    let res = client.post("customers.json", (), Some(body.to_string()))?;
-    Ok(())
+pub fn update(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> UpdatedCustomer {
+    /*let body = serde_json::to_value(customer)?;
+    let res = client.put(&format!("customers/{}.json", id), (), Some(body.to_string()))?;*/
+    let updated_customer = UpdatedCustomer::new(first_name, last_name, emails);
+    updated_customer
 }
 
 #[derive(Debug, Serialize)]
@@ -185,20 +253,20 @@ pub struct NewCustomer {
     #[serde(rename = "type")]
     pub first_name: String,
     pub last_name: String,
-    pub emails: Vec<NewCustomerEmail>,
+    pub emails: Vec<CustomerEmail>,
     pub organization: Option<String>,
     pub job_title: Option<String>,
     pub background: Option<String>,
-    pub address: Option<NewCustomerAddress>,
-    pub social_profiles: Option<Vec<NewCustomerSocialProfiles>>,
-    pub phones: Option<Vec<NewCustomerPhone>>,
-    pub chats: Option<Vec<NewCustomerChat>>,
-    pub websites: Option<Vec<NewCustomerWebsite>>,
+    pub address: Option<CustomerAddress>,
+    pub social_profiles: Option<Vec<CustomerSocialProfiles>>,
+    pub phones: Option<Vec<CustomerPhone>>,
+    pub chats: Option<Vec<CustomerChat>>,
+    pub websites: Option<Vec<CustomerWebsite>>,
 
 }
 
 impl NewCustomer {
-    pub fn create(first_name: &str, last_name: &str, emails: Vec<NewCustomerEmail>) -> NewCustomer {
+    pub fn new(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> NewCustomer {
         NewCustomer {
             first_name: first_name.into(),
             last_name: last_name.into(),
@@ -229,27 +297,27 @@ impl NewCustomer {
         self
     }
 
-    pub fn address(&mut self, address: NewCustomerAddress) -> &mut NewCustomer {
+    pub fn address(&mut self, address: CustomerAddress) -> &mut NewCustomer {
         self.address = Some(address);
         self
     }
 
-    pub fn social_profiles(&mut self, social_profiles: Vec<NewCustomerSocialProfiles>) -> &mut NewCustomer {
+    pub fn social_profiles(&mut self, social_profiles: Vec<CustomerSocialProfiles>) -> &mut NewCustomer {
         self.social_profiles = Some(social_profiles);
         self
     }
 
-    pub fn phones(&mut self, phones: Vec<NewCustomerPhone>) -> &mut NewCustomer {
+    pub fn phones(&mut self, phones: Vec<CustomerPhone>) -> &mut NewCustomer {
         self.phones = Some(phones);
         self
     }
 
-    pub fn chats(&mut self, chats: Vec<NewCustomerChat>) -> &mut NewCustomer {
+    pub fn chats(&mut self, chats: Vec<CustomerChat>) -> &mut NewCustomer {
         self.chats = Some(chats);
         self
     }
 
-    pub fn websites(&mut self, websites: Vec<NewCustomerWebsite>) -> &mut NewCustomer {
+    pub fn websites(&mut self, websites: Vec<CustomerWebsite>) -> &mut NewCustomer {
         self.websites = Some(websites);
         self
     }
@@ -263,106 +331,99 @@ impl NewCustomer {
     }
 }
 
-#[derive(Debug, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NewCustomerEmail {
-    pub value: String,
-    pub location: CustomerEmailLocationType,
-}
-
-impl NewCustomerEmail {
-    pub fn new(email: &str, location: CustomerEmailLocationType) -> NewCustomerEmail {
-        NewCustomerEmail {
-            value: email.into(),
-            location: location,
-        }
-    }
-}
-
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NewCustomerAddress {
-    pub city: String,
-    pub state: String,
-    pub country: String,
-    pub postal_code: String, 
-    pub lines: Vec<String>, //Street address/apartment numbers, etc
-    #[serde(with = "date_format")]
-    pub created_at: DateTime<Utc>,
+pub struct UpdatedCustomer {
+    pub first_name: String,
+    pub last_name: String,
+    pub emails: Vec<CustomerEmail>,
+    pub organization: Option<String>,
+    pub job_title: Option<String>,
+    pub background: Option<String>,
+    pub address: Option<CustomerAddress>,
+    pub social_profiles: Option<Vec<CustomerSocialProfiles>>,
+    pub phones: Option<Vec<CustomerPhone>>,
+    pub chats: Option<Vec<CustomerChat>>,
+    pub websites: Option<Vec<CustomerWebsite>>,
+
 }
 
-impl NewCustomerAddress {
-    pub fn new(city: &str, state: &str, country: &str, postal_code: &str, lines: Vec<String>, created_at: DateTime<Utc>) -> NewCustomerAddress {
-        NewCustomerAddress {
-            city: city.into(),
-            state: state.into(),
-            country: country.into(),
-            postal_code: postal_code.into(),
-            lines: lines,
-            created_at: created_at,
+impl UpdatedCustomer {
+    pub fn new(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> UpdatedCustomer {
+        UpdatedCustomer {
+            first_name: first_name.into(),
+            last_name: last_name.into(),
+            emails: emails,
+            organization: None,
+            job_title: None,
+            background: None,
+            address: None,
+            social_profiles: None,
+            phones: None,
+            chats: None,
+            websites: None,
         }
     }
-}
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NewCustomerPhone {
-    pub value: String,
-    pub location: CustomerPhoneLocationType,
-}
-
-impl NewCustomerPhone {
-    pub fn new(value: &str, location: CustomerPhoneLocationType) -> NewCustomerPhone {
-        NewCustomerPhone {
-            value: value.into(),
-            location: location,
-        }
+    pub fn first_name(&mut self, first_name: &str) -> &mut UpdatedCustomer {
+        self.first_name = first_name.into();
+        self
     }
-}
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NewCustomerSocialProfiles {
-    pub value: String,
-    pub type_: CustomerSocialProfileType,
-}
-
-impl NewCustomerSocialProfiles {
-    pub fn new(value: &str, type_: CustomerSocialProfileType) -> NewCustomerSocialProfiles {
-        NewCustomerSocialProfiles {
-            value: value.into(),
-            type_: type_,
-        }
+    pub fn last_name(&mut self, last_name: &str) -> &mut UpdatedCustomer {
+        self.last_name = last_name.into();
+        self
     }
-}
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NewCustomerChat {
-    pub value: String,
-    pub type_: CustomerChatType,
-}
-
-impl NewCustomerChat {
-    pub fn new(value: &str, type_: CustomerChatType) -> NewCustomerChat {
-        NewCustomerChat {
-            value: value.into(),
-            type_: type_,
-        }
+    pub fn email(&mut self, emails: Vec<CustomerEmail>) -> &mut UpdatedCustomer{
+        self.emails = emails;
+        self
     }
-}
 
-#[derive(Debug, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NewCustomerWebsite {
-    pub value: String,
-}
+    pub fn organization(&mut self, organization: &str) -> &mut UpdatedCustomer {
+        self.organization = Some(organization.into());
+        self
+    }
 
-impl NewCustomerWebsite {
-    pub fn new(value: &str) -> NewCustomerWebsite {
-        NewCustomerWebsite {
-            value: value.into(),
-        }
+    pub fn job_title(&mut self, job_title: &str) -> &mut UpdatedCustomer {
+        self.job_title = Some(job_title.into());
+        self
+    }
+
+    pub fn background(&mut self, background: &str) -> &mut UpdatedCustomer {
+        self.background = Some(background.into());
+        self
+    }
+
+    pub fn address(&mut self, address: CustomerAddress) -> &mut UpdatedCustomer {
+        self.address = Some(address);
+        self
+    }
+
+    pub fn social_profiles(&mut self, social_profiles: Vec<CustomerSocialProfiles>) -> &mut UpdatedCustomer {
+        self.social_profiles = Some(social_profiles);
+        self
+    }
+
+    pub fn phones(&mut self, phones: Vec<CustomerPhone>) -> &mut UpdatedCustomer {
+        self.phones = Some(phones);
+        self
+    }
+
+    pub fn chats(&mut self, chats: Vec<CustomerChat>) -> &mut UpdatedCustomer {
+        self.chats = Some(chats);
+        self
+    }
+
+    pub fn websites(&mut self, websites: Vec<CustomerWebsite>) -> &mut UpdatedCustomer {
+        self.websites = Some(websites);
+        self
+    }
+
+    pub fn send(&self, client: &Client, id: i32) -> Result<(), HelpScoutError> {
+        let body = serde_json::to_value(self)?;
+        let res = client.put(&format!("customers/{}.json", id), (), Some(body.to_string()))?;
+        Ok(())
     }
 }
 
