@@ -1,4 +1,4 @@
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Collection<T> {
     pub page: i32,
     pub pages: i32,
@@ -6,7 +6,7 @@ pub struct Collection<T> {
     pub items: Vec<T>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Item<T> {
     pub item: T,
 }

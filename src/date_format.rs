@@ -1,6 +1,6 @@
 pub mod date_format {
     use chrono::{DateTime, Utc};
-    use serde::{self, Serializer};
+    use serde::Serializer;
 
     // Stripped out nanoseconds from ISO 8601.
     const FORMAT: &'static str = "%Y-%m-%dT%H:%M:%SZ";
@@ -20,7 +20,7 @@ pub mod date_format {
 
 pub mod optional_date_format {
     use chrono::{DateTime, Utc};
-    use serde::{self, Serializer};
+    use serde::Serializer;
 
     // Stripped out nanoseconds from ISO 8601.
     const FORMAT: &'static str = "%Y-%m-%dT%H:%M:%SZ";

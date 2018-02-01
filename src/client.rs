@@ -8,6 +8,10 @@ use serde;
 use serde_json::{self, Value};
 use serde_url_params;
 
+// TODO: Maybe optionally compile these two?
+use std::env;
+use dotenv::dotenv;
+
 use error::HelpScoutError;
 
 /// The HelpScout API Rust client.
@@ -37,6 +41,19 @@ pub struct Status {
 
 impl Client {
     /// Create a new client to the HelpScout service.
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// use helpscout::Client;
+    ///
+    /// fn main() {
+    ///     let api_key = env::var("HELPSCOUT_API_KEY").expect("to have HELPSCOUT_API_KEY set");
+    ///     let client = Client::new(&api_key);
+    ///     let mailboxes = mailboxes::list(&client);
+    ///     assert!(mailboxes.items.len() > 0);
+    /// }
+    /// ```
     pub fn new(api_key: &str) -> Client {
         Client {
             retry_count: 3,
@@ -45,6 +62,13 @@ impl Client {
             api_key: api_key.into(),
             reqwest: reqwest::Client::new(),
         }
+    }
+
+    #[doc(hidden)]
+    pub fn example() -> Client {
+        dotenv().ok();
+        let api_key: String = env::var("HELPSCOUT_API_KEY").expect("to have HELPSCOUT_API_KEY set");
+        Client::new(&api_key)
     }
 
     /// Send a `get` request to the HelpScout service. This is intended to be used
@@ -59,7 +83,7 @@ impl Client {
     /// by the library and not the user.
     pub fn post<T>(&self, path: &str, url_params: T, body: Option<String>) -> Result<Value, HelpScoutError>
         where T: serde::Serialize
-    {   
+    {
         self.request(Method::Post, self.url(path, url_params)?, body)
     }
 
@@ -108,8 +132,8 @@ impl Client {
             let mut body = String::new();
             res.read_to_string(&mut body)?;
 
-            println!("Response body: {}", body);
-            println!("Response body: {}", res.status());
+            debug!("Response body: {}", body);
+            debug!("Response status: {}", res.status());
             match serde_json::from_str::<Value>(&body) {
                 Ok(value) => {
                     let status = serde_json::from_value(value.clone());
@@ -127,8 +151,8 @@ impl Client {
                     };
                 },
                 Err(_) => {
-                    println!("response headers: {}",res.headers());
-                    if(res.headers().has::<Location>()) {
+                    debug!("response headers: {}",res.headers());
+                    if res.headers().has::<Location>() {
                         return Ok(serde_json::Value::String("Created".into()));
                     } else if(res.status()==StatusCode::Ok)  {
                         return Ok(serde_json::Value::String("Ok".into()));
