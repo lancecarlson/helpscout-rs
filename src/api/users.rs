@@ -27,14 +27,14 @@ impl UsersBuilder {
     }
 
     /// Set the page for list actions
-    pub fn page(page: i32) -> Self {
-        self.page = page;
+    pub fn page(mut self, page: i32) -> Self {
+        self.page = Some(page);
         self
     }
 
     /// Set the user type for list actions
-    pub fn user_type(user_type: UserType) -> Self {
-        self.user_type = user_type;
+    pub fn user_type(mut self, user_type: UserType) -> Self {
+        self.user_type = Some(user_type);
         self
     }
 
