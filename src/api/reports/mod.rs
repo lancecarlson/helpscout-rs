@@ -7,15 +7,17 @@
 //! - [Conversations](conversations/index.html)
 //! - Docs (TODO)
 //! - Happiness (TODO)
-//! - Productivity (TODO)
+//! - [Productivity](productivity/index.html)
 //! - Company (TODO)
 //! - [User](user/index.html)
 pub mod conversations;
+pub mod productivity;
 pub mod user;
 
 use chrono::{DateTime, Utc};
 
 use self::conversations::ConversationsReportBuilder;
+use self::productivity::ProductivityReportBuilder;
 use self::user::UserReportBuilder;
 
 #[derive(Debug, Clone)]
@@ -32,10 +34,17 @@ impl ReportBuilder {
         }
     }
 
+    /// Helper for engaging the conversations reports
     pub fn conversations(self) -> ConversationsReportBuilder {
         self.into()
     }
 
+    /// Helper for engaging the productivity reports
+    pub fn productivity(self) -> ProductivityReportBuilder {
+        self.into()
+    }
+
+    /// Helper for engaging the user reports
     pub fn user(self) -> UserReportBuilder {
         self.into()
     }
