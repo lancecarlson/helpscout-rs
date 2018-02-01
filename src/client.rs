@@ -124,7 +124,6 @@ impl Client {
             let mut body = String::new();
             res.read_to_string(&mut body)?;
 
-            println!("Body: {}", body);
             debug!("Response body: {}", body);
 
             // I wish could just check the content type but authy mixes json
