@@ -19,7 +19,7 @@
 //! fn main() {
 //!     let report = overall_report().expect("run productivity overall report");
 //!     println!("{:#?}", report);
-//!     //assert!(report.current.total_conversations > 0);
+//!     assert!(report.current.total_conversations.unwrap() > 0);
 //! }
 //!
 //! fn overall_report() -> Result<ProductivityReport, HelpScoutError> {
@@ -54,16 +54,25 @@
 //!             23
 //!         ),
 //!         resolution_time: Some(
-//!             191616.1538461539
+//!             Duration {
+//!                 secs: 488475,
+//!                 nanos: 313000000
+//!             }
 //!         ),
 //!         replies_to_resolve: Some(
 //!             5.5384615384615383
 //!         ),
 //!         response_time: Some(
-//!             43911.0
+//!             Duration {
+//!                 secs: 43369,
+//!                 nanos: 0
+//!             }
 //!         ),
 //!         first_response_time: Some(
-//!             11059.0
+//!             Duration {
+//!                 secs: 14041,
+//!                 nanos: 0
+//!             }
 //!         ),
 //!         resolved: Some(
 //!             23
@@ -92,10 +101,16 @@
 //!             resolution_time: None,
 //!             replies_to_resolve: None,
 //!             response_time: Some(
-//!                 0.0
+//!                 Duration {
+//!                     secs: 0,
+//!                     nanos: 0
+//!                 }
 //!             ),
 //!             first_response_time: Some(
-//!                 0.0
+//!                 Duration {
+//!                     secs: 0,
+//!                     nanos: 0
+//!                 }
 //!             ),
 //!             resolved: None,
 //!             resolved_on_first_reply: None,
@@ -117,11 +132,13 @@
 
 use serde_json;
 use chrono::{DateTime, Utc};
+use time::Duration;
 
 use client::Client;
 use error::HelpScoutError;
 use api::reports::FilterTag;
 use super::{ProductivityReportBuilder};
+use duration_format::*;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -138,16 +155,21 @@ pub struct ProductivityTimeRangeStatistics {
     pub start_date: Option<DateTime<Utc>>,
     pub end_date: Option<DateTime<Utc>>,
     pub total_conversations: Option<i32>,
-    pub resolution_time: Option<f64>,
+    #[serde(with = "optional_duration_format")]
+    pub resolution_time: Option<Duration>,
     pub replies_to_resolve: Option<f64>,
-    pub response_time: Option<f64>,
-    pub first_response_time: Option<f64>,
+    #[serde(with = "optional_duration_format")]
+    pub response_time: Option<Duration>,
+    #[serde(with = "optional_duration_format")]
+    pub first_response_time: Option<Duration>,
     pub resolved: Option<i32>,
     pub resolved_on_first_reply: Option<i32>,
     pub closed: Option<i32>,
     pub replies_sent: Option<i32>,
     pub handle_time: Option<i32>,
     pub percent_resolved_on_first_reply: Option<f64>,
+    // undocumented, but comes through. I'm not sure if it's f64 or i32 or what
+    //pub ratings: Option<Vec<f64>>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
