@@ -18,12 +18,24 @@ pub struct UsersBuilder {
 }
 
 impl UsersBuilder {
-    pub fn new() -> UsersBuilder {
+    pub(crate) fn new() -> UsersBuilder {
         UsersBuilder {
             page: None,
             user_type: None,
             .. UsersBuilder::default()
         }
+    }
+
+    /// Set the page for list actions
+    pub fn page(page: i32) -> Self {
+        self.page = page;
+        self
+    }
+
+    /// Set the user type for list actions
+    pub fn user_type(user_type: UserType) -> Self {
+        self.user_type = user_type;
+        self
     }
 
     /// List Users
