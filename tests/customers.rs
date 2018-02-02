@@ -56,7 +56,7 @@ mod customers {
         
         let random_email_string = format!("guh{}@example.com", Uuid::new_v4());//Create unique email to run test multiple times
         let customer_email = CustomerEmail::new(&random_email_string, CustomerEmailLocationType::Work);
-        let customer_social_profile = vec![CustomerSocialProfiles::new("https://twitter.com/TwaikuGC", CustomerSocialProfileType::Twitter)];
+        let customer_social_profile = vec![CustomerSocialProfile::new("https://twitter.com/TwaikuGC", CustomerSocialProfileType::Twitter)];
 
         let customer =  customers::create("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").social_profiles(customer_social_profile).send(&c).expect("The new customer to be posted");
         
