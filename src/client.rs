@@ -120,7 +120,7 @@ impl Client {
                 password: Some("X".into()),
             };
             headers.set(Authorization(credentials));
-            headers.set(ContentType::json());   
+            headers.set(ContentType::json()); 
             let mut res = match request_body.clone() {
                 Some(b) => {
                     debug!("Request body - {}", b);
@@ -154,7 +154,7 @@ impl Client {
                     debug!("response headers: {}",res.headers());
                     if res.headers().has::<Location>() {
                         return Ok(serde_json::Value::String("Created".into()));
-                    } else if(res.status()==StatusCode::Ok)  {
+                    } else if(res.status()==StatusCode::Ok) {
                         return Ok(serde_json::Value::String("Ok".into()));
                     }else { 
                             match res.status() {
