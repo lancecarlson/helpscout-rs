@@ -87,6 +87,14 @@ impl Client {
         self.request(Method::Post, self.url(path, url_params)?, body)
     }
 
+    /// Send a `put` request to the HelpScout service. This is intended to be used
+    /// by the library and not the user.
+    pub fn put<T>(&self, path: &str, url_params: T, body: Option<String>) -> Result<Value, HelpScoutError>
+        where T: serde::Serialize
+    {   
+        self.request(Method::Put, self.url(path, url_params)?, body)
+    }
+
     fn url<T>(&self, path: &str, params: T) -> Result<Url, HelpScoutError>
         where T: serde::Serialize
     {
@@ -125,9 +133,7 @@ impl Client {
             res.read_to_string(&mut body)?;
 
             debug!("Response body: {}", body);
-
-            // I wish could just check the content type but authy mixes json
-            // and html content types when returning valid json.
+            debug!("Response status: {}", res.status());
             match serde_json::from_str::<Value>(&body) {
                 Ok(value) => {
                     let status = serde_json::from_value(value.clone());
@@ -148,7 +154,9 @@ impl Client {
                     debug!("response headers: {}",res.headers());
                     if res.headers().has::<Location>() {
                         return Ok(serde_json::Value::String("Created".into()));
-                    } else { 
+                    } else if(res.status()==StatusCode::Ok)  {
+                        return Ok(serde_json::Value::String("Ok".into()));
+                    }else { 
                             match res.status() {
                             StatusCode::ServiceUnavailable => {
                                 count -= 1;
