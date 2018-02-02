@@ -7,6 +7,7 @@ use error::HelpScoutError;
 use client::Client;
 use envelope::{Collection, Item};
 
+
 #[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CustomerSocialProfileType {
@@ -233,71 +234,118 @@ impl CustomerWebsite {
     }
 }
 
-/// List Customers
-///
-/// API docs:
-/// <https://developer.helpscout.com/help-desk-api/customers/list/>
-///
-/// ```rust
-/// extern crate helpscout;
-///
-/// use helpscout::{Client, Collection, HelpScoutError};
-/// use helpscout::api::customers::{self, Customer};
-///
-/// fn main() {
-///     let mailboxes = list_mailboxes().expect("list mailboxes");
-///     assert!(mailboxes.items.len() > 0);
-/// }
-///
-/// fn list_mailboxes() -> Result<Collection<Customer>, HelpScoutError> {
-///     let client = helpscout::Client::example();
-///
-///     //Grab list of customers with no parameters.
-///     //You can add parameters to narrow the results through
-///     //things such as .first_name() before sending the request.
-///     //Check out the customer list api docs for more possible parameters.
-///     customers::list().send(&client)
-/// }
-/// ```
-pub fn list() -> CustomersListParamBuilder {
-    let param_builder = CustomersListParamBuilder::new();
-    param_builder
+#[derive(Debug, Default, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomersListParamBuilder {
+    pub(crate) first_name: Option<String>,
+    pub(crate) last_name: Option<String>,
+    pub(crate) email: Option<String>,
+    #[serde(with = "optional_date_format")]
+    pub(crate) modified_since: Option<DateTime<Utc>>,
+    pub(crate) page: Option<i32>,
 }
 
-/// List Customers by Mailbox
-///
-/// API docs:
-/// <https://developer.helpscout.com/help-desk-api/customers/list-mailbox/>
-///
-/// ```rust
-/// extern crate helpscout;
-///
-/// use helpscout::{Client, Collection, HelpScoutError};
-/// use helpscout::api::mailboxes::{self, Mailbox};
-/// use helpscout::api::customers::{self, Customer};
-///
-/// fn main() {
-///     let customers = list_customers_by_mailbox().expect("Customers for the mailbox to be listed");
-///     assert!(customers.items.len() > 0);
-/// }
-///
-/// fn list_customers_by_mailbox() -> Result<Collection<Customer>, HelpScoutError> {
-///     let client = helpscout::Client::example();
-///
-///     //Grab list of mailboxes under an account to provide a mailbox ID for testing.
-///     let mailboxes = mailboxes::list(&client);
-///
-///     //Return list of customers under the specified mailbox.
-///     customers::list_by_mailbox(&client, mailboxes.items[0].id)
-/// }
-/// ```
-pub fn list_by_mailbox(
-    client: &Client,
-    mailbox_id: i32,
-) -> Result<Collection<Customer>, HelpScoutError> {
-    let res = client.get(&format!("mailboxes/{}/customers.json", mailbox_id), ())?;
-    let customers = serde_json::from_value(res.clone())?;
-    Ok(customers)
+impl CustomersListParamBuilder {
+    pub(crate) fn new() -> CustomersListParamBuilder {
+        CustomersListParamBuilder {
+            first_name: None,
+            last_name: None,
+            email: None,
+            modified_since: None,
+            page: None,
+            .. CustomersListParamBuilder::default()
+        }
+    }
+
+    pub fn first_name(&mut self, first_name: &str) -> &mut CustomersListParamBuilder {
+        self.first_name = Some(first_name.into());
+        self
+    }
+
+    pub fn last_name(&mut self, last_name: &str) -> &mut CustomersListParamBuilder {
+        self.last_name = Some(last_name.into());
+        self
+    }
+
+    pub fn email(&mut self, email: &str) -> &mut CustomersListParamBuilder {
+        self.email = Some(email.into());
+        self
+    }
+
+    pub fn modified_since(&mut self, modified_since: DateTime<Utc>) -> &mut CustomersListParamBuilder {
+        self.modified_since = Some(modified_since);
+        self
+    }
+
+    pub fn page(&mut self, page: i32) -> &mut CustomersListParamBuilder {
+        self.page = Some(page);
+        self
+    }
+
+    /// List Customers
+    ///
+    /// API docs:
+    /// <https://developer.helpscout.com/help-desk-api/customers/list/>
+    ///
+    /// ```rust
+    /// extern crate helpscout;
+    ///
+    /// use helpscout::{Client, Collection, HelpScoutError};
+    /// use helpscout::api::customers::{self, Customer};
+    ///
+    /// fn main() {
+    ///     let customers = list_customers().expect("list mailboxes");
+    ///     assert!(customers.items.len() > 0);
+    /// }
+    ///
+    /// fn list_customers() -> Result<Collection<Customer>, HelpScoutError> {
+    ///     let client = helpscout::Client::example();
+    ///
+    ///     //Grab list of customers with no parameters.
+    ///     //You can add parameters to narrow the results through
+    ///     //things such as .first_name() before sending the request.
+    ///     //Check out the customer list api docs for more possible parameters.
+    ///     helpscout::api::customers().list(&client)
+    /// }
+    /// ```
+    pub fn list(&self, client: &Client) -> Result<Collection<Customer>, HelpScoutError> {
+        let res = client.get("customers.json", &self)?;
+        let customers = serde_json::from_value(res.clone())?;
+        Ok(customers)
+    }
+
+    /// List Customers by Mailbox
+    ///
+    /// API docs:
+    /// <https://developer.helpscout.com/help-desk-api/customers/list-mailbox/>
+    ///
+    /// ```rust
+    /// extern crate helpscout;
+    ///
+    /// use helpscout::{Client, Collection, HelpScoutError};
+    /// use helpscout::api::mailboxes::{self, Mailbox};
+    /// use helpscout::api::customers::{self, Customer};
+    ///
+    /// fn main() {
+    ///     let customers = list_customers_by_mailbox().expect("Customers for the mailbox to be listed");
+    ///     assert!(customers.items.len() > 0);
+    /// }
+    ///
+    /// fn list_customers_by_mailbox() -> Result<Collection<Customer>, HelpScoutError> {
+    ///     let client = helpscout::Client::example();
+    ///
+    ///     //Grab list of mailboxes under an account to provide a mailbox ID for testing.
+    ///     let mailboxes = mailboxes::list(&client).expect("Mailboxes to be listed");
+    ///
+    ///     //Return list of customers under the specified mailbox.
+    ///     helpscout::api::customers().list_by_mailbox(&client, mailboxes.items[0].id)
+    /// }
+    /// ```
+    pub fn list_by_mailbox(&self, client: &Client, mailbox_id: i32) -> Result<Collection<Customer>, HelpScoutError> {
+        let res = client.get(&format!("mailboxes/{}/customers.json", mailbox_id), &self)?;
+        let customers = serde_json::from_value(res.clone())?;
+        Ok(customers)
+    }
 }
 
 /// Get Customer
@@ -308,19 +356,19 @@ pub fn list_by_mailbox(
 /// ```rust
 /// extern crate helpscout;
 ///
-/// use helpscout::{Client, Collection, HelpScoutError};
+/// use helpscout::{Client, Collection, Item, HelpScoutError};
 /// use helpscout::api::customers::{self, Customer};
 ///
 /// fn main() {
-///     let customer = get_customer().expect("Customers for the mailbox to be listed");
+///     let customer = get_customer().expect("the first customer in the list be returned with all optional params");
 ///     assert!(customer.item.id > 0);
 /// }
 ///
-/// fn get_customer() -> Result<Collection<Customer>, HelpScoutError> {
+/// fn get_customer() -> Result<Item<Customer>, HelpScoutError> {
 ///     let client = helpscout::Client::example();
 ///
 ///     //Grab list of customers with no parameters to get a specific customer id.
-///     let customers = customers::list().send(&client)
+///     let customers = helpscout::api::customers().list(&client).expect("Customers to be listed");
 ///
 ///     //Return a single customer with the corresponding id, including the
 ///     //extra optional fields mentioned in the customer object documentation.
@@ -340,6 +388,7 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
 ///
 /// ```rust
 /// extern crate helpscout;
+/// extern crate uuid;
 ///
 /// use uuid::Uuid;
 /// use helpscout::{Client, Collection, HelpScoutError};
@@ -351,7 +400,8 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
 /// }
 ///
 /// fn create_customer() -> Result<Collection<Customer>, HelpScoutError> {
-///
+///     let client = helpscout::Client::example();
+/// 
 ///     //Create unique email to run the example multiple times.
 ///     let random_email_string = format!("guh{}@example.com", Uuid::new_v4());
 ///     let customer_email = CustomerEmail::new(&random_email_string, CustomerEmailLocationType::Work);
@@ -361,8 +411,8 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
 ///     let customer_social_profiles = vec![CustomerSocialProfile::new("https://twitter.com/TwaikuGC", CustomerSocialProfileType::Twitter)];
 ///
 ///     //Create new customer object and upload it to HelpScout, then return the customer in a list
-///     customers::create("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").social_profiles(customer_social_profile).send(&c).expect("The new customer to be posted");
-///     customers::list().last_name("Dog").page(1).send(&c).expect("Customers to be listed")
+///     customers::create("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").social_profiles(customer_social_profiles).send(&client).expect("The new customer to be posted");
+///     helpscout::api::customers().last_name("Dog").page(1).list(&client)
 ///
 ///
 /// }
@@ -379,34 +429,37 @@ pub fn create(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> 
 ///
 /// ```rust
 /// extern crate helpscout;
+/// extern crate uuid;
 ///
-///
-/// use helpscout::{Client, Collection, HelpScoutError};
+/// use uuid::Uuid;
+/// use helpscout::{Client, Collection, Item, HelpScoutError};
 /// use helpscout::api::customers::{self, Customer, CustomerEmail, CustomerEmailLocationType};
 ///
 /// fn main() {
-///     let customers = update_customer().expect("Customer to be created, then the new customer to be returned through the list function");
+///     let customers = update_customer().expect("Updated customer to be listed");
 ///     assert!(customers.items.len() > 0);
 /// }
 ///
 /// fn update_customer() -> Result<Collection<Customer>, HelpScoutError> {
-///
+///     let client = helpscout::Client::example();
+/// 
 ///     //Pull list and get unique customer id and object to run the example.
-///     let customers_list = customers::list().send(&c).expect("Customers to be listed");
-///     let customer = customers::get(&c, customers_list.items[0].id);
+///     let customers_list = helpscout::api::customers().list(&client).expect("Customers to be listed");
+///     let customer = customers::get(&client, customers_list.items[0].id).expect("the first customer in the list be returned but with all optional params");
 ///
 ///     //Let's build a new test email to add to the existing customer. We can also pull an email object
 ///     //out of the customer object and change the variables within it such as its type or address.
-///     let new_customer_emails = CustomerEmail::new("newtest@email.com", CustomerEmailLocationType::Work);
+///     let rand_email = format!("updatetestemail{}@example.com", Uuid::new_v4());
+///     let new_customer_emails = CustomerEmail::new(&rand_email, CustomerEmailLocationType::Work);
 ///
 ///     //Pull the same customer last name, but update the first name to something new.
 ///     let customer_name = customers_list.items[0].last_name.clone().unwrap();
 ///
 ///     //Update customer based on id.
-///     customers::update("UPDATEDTEST", &customer_name, vec![new_customer_emails]).organization("DOGS").background("UPDATEDTEST").send(&c, customers_list.items[0].id).expect("Customer to be updated");
+///     customers::update("UPDATEDTEST", &customer_name, vec![new_customer_emails]).organization("DOGS").background("UPDATEDTEST").send(&client, customers_list.items[0].id).expect("Customer to be updated");
 ///
 ///     //Return list of customers that have our updated first name
-///     customers::list().first_name("UPDATEDTEST").send(&c).expect("Updated customer to be listed")
+///     helpscout::api::customers().first_name("UPDATEDTEST").list(&client)
 ///
 ///
 /// }
@@ -569,10 +622,7 @@ impl UpdatedCustomer {
         self
     }
 
-    pub fn social_profiles(
-        &mut self,
-        social_profiles: Vec<CustomerSocialProfile>,
-    ) -> &mut UpdatedCustomer {
+    pub fn social_profiles(&mut self, social_profiles: Vec<CustomerSocialProfile>) -> &mut UpdatedCustomer {
         self.social_profiles = Some(social_profiles);
         self
     }
@@ -600,64 +650,5 @@ impl UpdatedCustomer {
             Some(body.to_string()),
         )?;
         Ok(())
-    }
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CustomersListParamBuilder {
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub email: Option<String>,
-    #[serde(with = "optional_date_format")]
-    pub modified_since: Option<DateTime<Utc>>,
-    pub page: Option<i32>,
-}
-
-impl CustomersListParamBuilder {
-    pub fn new() -> CustomersListParamBuilder {
-        CustomersListParamBuilder {
-            first_name: None,
-            last_name: None,
-            email: None,
-            modified_since: None,
-            page: None,
-        }
-    }
-
-    pub fn first_name(&mut self, first_name: &str) -> &mut CustomersListParamBuilder {
-        self.first_name = Some(first_name.into());
-        self
-    }
-
-    pub fn last_name(&mut self, last_name: &str) -> &mut CustomersListParamBuilder {
-        self.last_name = Some(last_name.into());
-        self
-    }
-
-    pub fn email(&mut self, email: &str) -> &mut CustomersListParamBuilder {
-        self.email = Some(email.into());
-        self
-    }
-
-    pub fn modified_since(&mut self, modified_since: DateTime<Utc>) -> &mut CustomersListParamBuilder {
-        self.modified_since = Some(modified_since);
-        self
-    }
-
-    pub fn page(&mut self, page: i32) -> &mut CustomersListParamBuilder {
-        self.page = Some(page);
-        self
-    }
-
-    pub fn params(&self) -> Option<Vec<(String, String)>> {
-        let params: Vec<(String, String)> = vec![];
-        Some(params)
-    }
-
-    pub fn send(&self, client: &Client) -> Result<Collection<Customer>, HelpScoutError> {
-        let res = client.get("customers.json", &self)?;
-        let customers = serde_json::from_value(res.clone())?;
-        Ok(customers)
     }
 }
