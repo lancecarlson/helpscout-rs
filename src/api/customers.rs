@@ -33,7 +33,9 @@ pub enum CustomerEmailLocationType {
 }
 
 impl Default for CustomerEmailLocationType {
-    fn default() -> CustomerEmailLocationType {CustomerEmailLocationType::Work}
+    fn default() -> CustomerEmailLocationType {
+        CustomerEmailLocationType::Work
+    }
 }
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -97,12 +99,12 @@ pub struct Customer {
     pub created_at: DateTime<Utc>,
     pub modified_at: Option<DateTime<Utc>>,
 
-    // Additional fields that appear only when retrieving a single customer/via get
+    // Additional fields that appear only when retrieving a single customer
     pub background: Option<String>,
     pub address: Option<CustomerAddress>,
     pub social_profiles: Option<Vec<CustomerSocialProfile>>,
     pub emails: Option<Vec<CustomerEmail>>,
-    pub phones: Option<Vec<CustomerPhone>>,//Always return from get as an empty array for some reason
+    pub phones: Option<Vec<CustomerPhone>>, //Always return from get as an empty array for some reason
     pub chats: Option<Vec<CustomerChat>>,
     pub websites: Option<Vec<CustomerWebsite>>,
 }
@@ -114,14 +116,21 @@ pub struct CustomerAddress {
     pub city: String,
     pub state: String,
     pub country: String,
-    pub postal_code: String, 
+    pub postal_code: String,
     pub lines: Vec<String>, //Street address/apartment numbers, etc
     pub created_at: DateTime<Utc>,
     pub modified_at: Option<DateTime<Utc>>,
 }
 
 impl CustomerAddress {
-    pub fn new(city: &str, state: &str, country: &str, postal_code: &str, lines: Vec<String>, created_at: DateTime<Utc>) -> CustomerAddress {
+    pub fn new(
+        city: &str,
+        state: &str,
+        country: &str,
+        postal_code: &str,
+        lines: Vec<String>,
+        created_at: DateTime<Utc>,
+    ) -> CustomerAddress {
         CustomerAddress {
             id: None,
             city: city.into(),
@@ -140,15 +149,19 @@ impl CustomerAddress {
 pub struct CustomerSocialProfile {
     pub id: Option<i32>,
     pub value: String,
-    pub type_: CustomerSocialProfileType,
+    #[serde(rename = "type")]
+    pub social_profile_type: CustomerSocialProfileType,
 }
 
 impl CustomerSocialProfile {
-    pub fn new(value: &str, type_: CustomerSocialProfileType) -> CustomerSocialProfile {
+    pub fn new(
+        value: &str,
+        social_profile_type: CustomerSocialProfileType,
+    ) -> CustomerSocialProfile {
         CustomerSocialProfile {
             id: None,
             value: value.into(),
-            type_: type_,
+            social_profile_type: social_profile_type,
         }
     }
 }
@@ -191,15 +204,16 @@ impl CustomerPhone {
 pub struct CustomerChat {
     pub id: Option<i32>,
     pub value: String,
-    pub type_: CustomerChatType,
+    #[serde(rename = "type")]
+    pub customer_chat_type: CustomerChatType,
 }
 
 impl CustomerChat {
-    pub fn new(value: &str, type_: CustomerChatType) -> CustomerChat {
+    pub fn new(value: &str, customer_chat_type: CustomerChatType) -> CustomerChat {
         CustomerChat {
             id: None,
             value: value.into(),
-            type_: type_,
+            customer_chat_type: customer_chat_type,
         }
     }
 }
@@ -237,11 +251,11 @@ impl CustomerWebsite {
 ///
 /// fn list_mailboxes() -> Result<Collection<Customer>, HelpScoutError> {
 ///     let client = helpscout::Client::example();
-///     
+///
 ///     //Grab list of customers with no parameters.
 ///     //You can add parameters to narrow the results through
 ///     //things such as .first_name() before sending the request.
-///     //Check out the customer list api docs for more possible parameters. 
+///     //Check out the customer list api docs for more possible parameters.
 ///     customers::list().send(&client)
 /// }
 /// ```
@@ -249,7 +263,6 @@ pub fn list() -> CustomersListParamBuilder {
     let param_builder = CustomersListParamBuilder::new();
     param_builder
 }
-
 
 /// List Customers by Mailbox
 ///
@@ -270,15 +283,18 @@ pub fn list() -> CustomersListParamBuilder {
 ///
 /// fn list_customers_by_mailbox() -> Result<Collection<Customer>, HelpScoutError> {
 ///     let client = helpscout::Client::example();
-/// 
+///
 ///     //Grab list of mailboxes under an account to provide a mailbox ID for testing.
 ///     let mailboxes = mailboxes::list(&client);
-///     
+///
 ///     //Return list of customers under the specified mailbox.
 ///     customers::list_by_mailbox(&client, mailboxes.items[0].id)
 /// }
 /// ```
-pub fn list_by_mailbox(client: &Client, mailbox_id: i32) -> Result<Collection<Customer>, HelpScoutError> {
+pub fn list_by_mailbox(
+    client: &Client,
+    mailbox_id: i32,
+) -> Result<Collection<Customer>, HelpScoutError> {
     let res = client.get(&format!("mailboxes/{}/customers.json", mailbox_id), ())?;
     let customers = serde_json::from_value(res.clone())?;
     Ok(customers)
@@ -302,12 +318,12 @@ pub fn list_by_mailbox(client: &Client, mailbox_id: i32) -> Result<Collection<Cu
 ///
 /// fn get_customer() -> Result<Collection<Customer>, HelpScoutError> {
 ///     let client = helpscout::Client::example();
-/// 
+///
 ///     //Grab list of customers with no parameters to get a specific customer id.
 ///     let customers = customers::list().send(&client)
-///     
+///
 ///     //Return a single customer with the corresponding id, including the
-///     //extra  mentioned in the customer object documentation.
+///     //extra optional fields mentioned in the customer object documentation.
 ///     customers::get(&client, customers.items[0].id)
 /// }
 /// ```
@@ -335,27 +351,26 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
 /// }
 ///
 /// fn create_customer() -> Result<Collection<Customer>, HelpScoutError> {
-/// 
-///     //Create unique email to run the example multiple times.        
+///
+///     //Create unique email to run the example multiple times.
 ///     let random_email_string = format!("guh{}@example.com", Uuid::new_v4());
 ///     let customer_email = CustomerEmail::new(&random_email_string, CustomerEmailLocationType::Work);
-/// 
+///
 ///     //Note that for each of these objects we're passing them as a vector.
 ///     //You can include more than one of these objects in the vec before sending it off as a request.
 ///     let customer_social_profiles = vec![CustomerSocialProfile::new("https://twitter.com/TwaikuGC", CustomerSocialProfileType::Twitter)];
-///     
+///
 ///     //Create new customer object and upload it to HelpScout, then return the customer in a list
 ///     customers::create("Mega", "Dog", vec![customer_email] ).organization("megadog inc").job_title("MegaDoge").social_profiles(customer_social_profile).send(&c).expect("The new customer to be posted");
 ///     customers::list().last_name("Dog").page(1).send(&c).expect("Customers to be listed")
-///     
-/// 
+///
+///
 /// }
 /// ```
-pub fn create (first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> NewCustomer {
+pub fn create(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> NewCustomer {
     let new_customer = NewCustomer::new(first_name, last_name, emails);
     new_customer
 }
-
 
 /// Update Customer
 ///
@@ -375,25 +390,25 @@ pub fn create (first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) ->
 /// }
 ///
 /// fn update_customer() -> Result<Collection<Customer>, HelpScoutError> {
-/// 
-///     //Pull list and get unique customer id and object to run the example. 
+///
+///     //Pull list and get unique customer id and object to run the example.
 ///     let customers_list = customers::list().send(&c).expect("Customers to be listed");
-///     let customer = customers::get(&c, customers_list.items[0].id);    
-/// 
+///     let customer = customers::get(&c, customers_list.items[0].id);
+///
 ///     //Let's build a new test email to add to the existing customer. We can also pull an email object
 ///     //out of the customer object and change the variables within it such as its type or address.
 ///     let new_customer_emails = CustomerEmail::new("newtest@email.com", CustomerEmailLocationType::Work);
-///     
+///
 ///     //Pull the same customer last name, but update the first name to something new.
 ///     let customer_name = customers_list.items[0].last_name.clone().unwrap();
-/// 
+///
 ///     //Update customer based on id.
 ///     customers::update("UPDATEDTEST", &customer_name, vec![new_customer_emails]).organization("DOGS").background("UPDATEDTEST").send(&c, customers_list.items[0].id).expect("Customer to be updated");
-///     
+///
 ///     //Return list of customers that have our updated first name
 ///     customers::list().first_name("UPDATEDTEST").send(&c).expect("Updated customer to be listed")
-///     
-/// 
+///
+///
 /// }
 /// ```
 pub fn update(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> UpdatedCustomer {
@@ -416,7 +431,6 @@ pub struct NewCustomer {
     pub phones: Option<Vec<CustomerPhone>>,
     pub chats: Option<Vec<CustomerChat>>,
     pub websites: Option<Vec<CustomerWebsite>>,
-
 }
 
 impl NewCustomer {
@@ -456,7 +470,10 @@ impl NewCustomer {
         self
     }
 
-    pub fn social_profiles(&mut self, social_profiles: Vec<CustomerSocialProfile>) -> &mut NewCustomer {
+    pub fn social_profiles(
+        &mut self,
+        social_profiles: Vec<CustomerSocialProfile>,
+    ) -> &mut NewCustomer {
         self.social_profiles = Some(social_profiles);
         self
     }
@@ -481,7 +498,6 @@ impl NewCustomer {
         //println!("{:?}", body);
         let res = client.post("customers.json", (), Some(body.to_string()))?;
         Ok(())
-    
     }
 }
 
@@ -499,7 +515,6 @@ pub struct UpdatedCustomer {
     pub phones: Option<Vec<CustomerPhone>>,
     pub chats: Option<Vec<CustomerChat>>,
     pub websites: Option<Vec<CustomerWebsite>>,
-
 }
 
 impl UpdatedCustomer {
@@ -529,7 +544,7 @@ impl UpdatedCustomer {
         self
     }
 
-    pub fn email(&mut self, emails: Vec<CustomerEmail>) -> &mut UpdatedCustomer{
+    pub fn email(&mut self, emails: Vec<CustomerEmail>) -> &mut UpdatedCustomer {
         self.emails = emails;
         self
     }
@@ -554,7 +569,10 @@ impl UpdatedCustomer {
         self
     }
 
-    pub fn social_profiles(&mut self, social_profiles: Vec<CustomerSocialProfile>) -> &mut UpdatedCustomer {
+    pub fn social_profiles(
+        &mut self,
+        social_profiles: Vec<CustomerSocialProfile>,
+    ) -> &mut UpdatedCustomer {
         self.social_profiles = Some(social_profiles);
         self
     }
@@ -576,7 +594,11 @@ impl UpdatedCustomer {
 
     pub fn send(&self, client: &Client, id: i32) -> Result<(), HelpScoutError> {
         let body = serde_json::to_value(self)?;
-        let res = client.put(&format!("customers/{}.json", id), (), Some(body.to_string()))?;
+        let res = client.put(
+            &format!("customers/{}.json", id),
+            (),
+            Some(body.to_string()),
+        )?;
         Ok(())
     }
 }
@@ -584,7 +606,6 @@ impl UpdatedCustomer {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CustomersListParamBuilder {
-
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub email: Option<String>,
@@ -639,5 +660,4 @@ impl CustomersListParamBuilder {
         let customers = serde_json::from_value(res.clone())?;
         Ok(customers)
     }
-
 }
