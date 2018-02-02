@@ -11,9 +11,14 @@ use chrono::{DateTime, Utc};
 use self::users::UsersBuilder;
 use self::customers::CustomersListParamBuilder;
 use self::reports::ReportBuilder;
+use self::teams::TeamsBuilder;
 
 pub fn users() -> UsersBuilder {
     UsersBuilder::default()
+}
+
+pub fn teams() -> TeamsBuilder {
+    TeamsBuilder::default()
 }
 
 pub fn customers() -> CustomersListParamBuilder {
