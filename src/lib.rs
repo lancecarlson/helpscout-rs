@@ -53,6 +53,7 @@ extern crate serde_json;
 extern crate serde_url_params;
 
 extern crate chrono;
+extern crate time;
 
 #[macro_use]
 extern crate log;
@@ -73,6 +74,7 @@ mod envelope;
 pub use envelope::{Collection, Item};
 
 mod date_format;
+mod duration_format;
 
 pub mod api;
 pub mod webhook;
