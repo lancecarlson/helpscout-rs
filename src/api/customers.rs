@@ -1,3 +1,4 @@
+//! Customer Endpoints
 use serde_json;
 use chrono::{DateTime, Utc};
 use date_format::*;
@@ -96,12 +97,12 @@ pub struct Customer {
     pub created_at: DateTime<Utc>,
     pub modified_at: Option<DateTime<Utc>>,
 
-    // Additional fields that appear only when retrieving a single customer
+    // Additional fields that appear only when retrieving a single customer/via get
     pub background: Option<String>,
     pub address: Option<CustomerAddress>,
     pub social_profiles: Option<Vec<CustomerSocialProfile>>,
     pub emails: Option<Vec<CustomerEmail>>,
-    pub phones: Option<Vec<CustomerPhone>>,//Always an empty array for some reason
+    pub phones: Option<Vec<CustomerPhone>>,//Always return from get as an empty array for some reason
     pub chats: Option<Vec<CustomerChat>>,
     pub websites: Option<Vec<CustomerWebsite>>,
 }
@@ -246,7 +247,6 @@ impl CustomerWebsite {
 /// ```
 pub fn list() -> CustomersListParamBuilder {
     let param_builder = CustomersListParamBuilder::new();
-    //println!("{:?}", param_builder);
     param_builder
 }
 
@@ -365,9 +365,9 @@ pub fn create (first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) ->
 /// ```rust
 /// extern crate helpscout;
 ///
-/// use uuid::Uuid;
+///
 /// use helpscout::{Client, Collection, HelpScoutError};
-/// use helpscout::api::customers::{self, Customer, CustomerEmail, CustomerEmailLocationType, CustomerSocialProfile, CustomerSocialProfileType};
+/// use helpscout::api::customers::{self, Customer, CustomerEmail, CustomerEmailLocationType};
 ///
 /// fn main() {
 ///     let customers = update_customer().expect("Customer to be created, then the new customer to be returned through the list function");
@@ -388,7 +388,7 @@ pub fn create (first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) ->
 ///     let customer_name = customers_list.items[0].last_name.clone().unwrap();
 /// 
 ///     //Update customer based on id.
-///     let mut res = customers::update("UPDATEDTEST", &customer_name, vec![new_customer_emails]).organization("DOGS").background("UPDATEDTEST").send(&c, customers_list.items[0].id).expect("Customer to be updated");
+///     customers::update("UPDATEDTEST", &customer_name, vec![new_customer_emails]).organization("DOGS").background("UPDATEDTEST").send(&c, customers_list.items[0].id).expect("Customer to be updated");
 ///     
 ///     //Return list of customers that have our updated first name
 ///     customers::list().first_name("UPDATEDTEST").send(&c).expect("Updated customer to be listed")
