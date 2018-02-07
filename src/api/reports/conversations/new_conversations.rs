@@ -37,7 +37,7 @@
 //! ```rust,ignore
 //! NewConversationsReport {
 //!     current: [
-//!         StartCountStatistics {
+//!         NewConversationsStatistics {
 //!             start: 2018-01-30T18:41:25Z,
 //!             count: 12,
 //!         },
@@ -51,13 +51,13 @@ use serde_json;
 
 use client::Client;
 use error::HelpScoutError;
-use super::{ConversationsReportBuilder, StartCountStatistics};
+use super::{ConversationsReportBuilder, NewConversationsStatistics};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewConversationsReport {
-    pub current: Vec<StartCountStatistics>,
-    pub previous: Option<StartCountStatistics>,
+    pub current: Vec<NewConversationsStatistics>,
+    pub previous: Option<NewConversationsStatistics>,
 }
 
 

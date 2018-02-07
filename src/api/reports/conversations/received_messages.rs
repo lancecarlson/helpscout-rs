@@ -37,9 +37,9 @@
 //! ```rust,ignore
 //! ReceivedMessagesReport {
 //!     current: [
-//!         StartCountStatistics {
-//!             start: 2018-01-30T18:41:25Z,
-//!             count: 12,
+//!         DateMessageStatistics {
+//!             date: 2018-01-30T18:41:25Z,
+//!             messages: 12,
 //!         },
 //!         // More
 //!     ],
@@ -51,13 +51,13 @@ use serde_json;
 
 use client::Client;
 use error::HelpScoutError;
-use super::{ConversationsReportBuilder, StartCountStatistics};
+use super::{ConversationsReportBuilder, ReceivedMessagesStatistics};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReceivedMessagesReport {
-    pub current: Vec<StartCountStatistics>,
-    pub previous: Option<StartCountStatistics>,
+    pub current: Vec<ReceivedMessagesStatistics>,
+    pub previous: Option<ReceivedMessagesStatistics>,
 }
 
 

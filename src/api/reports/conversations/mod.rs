@@ -8,6 +8,7 @@ pub mod overall;
 pub mod busy_times;
 pub mod new_conversations;
 pub mod received_messages;
+pub mod drill_down;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct TopStatistics<T> {
@@ -63,9 +64,47 @@ pub struct BusyTimeStatistics {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct StartCountStatistics {
+pub struct NewConversationsStatistics {
     pub start: DateTime<Utc>,
     pub count: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ReceivedMessagesStatistics {
+    pub date: DateTime<Utc>,
+    pub messages: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AbbreviatedConversationsStatistics {
+    pub id: i32,
+    pub number: i32,
+    #[serde(rename = "type")]
+    pub conversation_type: ConversationType,
+    pub mailboxid: i32,
+    pub attachments: bool,
+    pub subject: String,
+    pub status: ConversationStatus,
+    pub thread_count: i32,
+    pub preview: String,
+    pub customer_name: String,
+    pub customer_email: String,
+    pub customer_ids: Vec<i32>,
+    pub modified_at: DateTime<Utc>,
+    pub waiting_since: DateTime<Utc>,
+    pub waiting_since_type: i32,
+    pub assignedid: i32,
+    pub tags: Vec<ColorTag>,
+    pub assigned_name: Option<String>, 
+}
+
+// Color tags for drill down/abbreviated conversation reports
+#[derive(Debug, Clone, Deserialize)]
+pub struct ColorTag {
+    pub id: i32,
+    pub name: String,
+    pub color: String,
 }
 
 // Optionally set this previous time range to compare against
@@ -75,12 +114,30 @@ pub struct PreviousRange {
     pub previous_end: Option<DateTime<Utc>>,
 }
 
+//Enum for display the interval which the statistics summarize in received/new conversations
 #[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ConvReportViewByType {
     Day,
     Week,
     Month,
+}
+
+#[derive(Debug, Serialize, Clone, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ConversationType {
+    Email,
+    Chat,
+    Phone,
+}
+
+#[derive(Debug, Serialize, Clone, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ConversationStatus {
+    Active,
+    Pending,
+    Closed,
+    Spam,
 }
 
 #[serde(default)]
@@ -98,6 +155,8 @@ pub struct ConversationsReportBuilder {
     pub folders: Option<String>,
 
     // Only some reports want these
+    pub page: Option<i32>,
+    pub rows: Option<i32>, //For drilldown: defaults to 10, maximum value is 50
     pub view_by: Option<ConvReportViewByType>,
     #[serde(with = "optional_date_format")]
     pub previous_start: Option<DateTime<Utc>>,
@@ -137,6 +196,16 @@ impl ConversationsReportBuilder {
         self.previous_end = Some(previous_end);
         self
     }
+
+    pub fn set_page(mut self, page: i32) -> Self {
+        self.page = Some(page);
+        self
+    }
+
+    pub fn set_rows(mut self, rows: i32) -> Self {
+        self.rows = Some(rows);
+        self
+    }
 }
 
 impl From<ReportBuilder> for ConversationsReportBuilder {
@@ -145,10 +214,12 @@ impl From<ReportBuilder> for ConversationsReportBuilder {
             start: report.start,
             end: report.end,
             mailboxes: None,
-            view_by: None,
             tags: None,
             types: None,
             folders: None,
+            view_by: None,
+            page: None,
+            rows: None,
             previous_start: None,
             previous_end: None,
         }
