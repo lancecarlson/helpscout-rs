@@ -151,10 +151,8 @@ impl Client {
                     };
                 },
                 Err(_) => {
-                    debug!("response headers: {}",res.headers());
-                    if res.headers().has::<Location>() {
-                        return Ok(serde_json::Value::String("Created".into()));
-                    } else if(res.status()==StatusCode::Ok) {
+                    debug!("Response status: {}",res.status());
+                    if res.status()==StatusCode::Ok||res.status()==StatusCode::Created {
                         return Ok(serde_json::Value::String("Ok".into()));
                     }else { 
                             match res.status() {

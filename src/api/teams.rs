@@ -1,7 +1,5 @@
 //! Teams Endpoints
 use serde_json;
-use chrono::{DateTime, Utc};
-use date_format::*;
 
 use error::HelpScoutError;
 use client::Client;
@@ -39,14 +37,15 @@ impl TeamsBuilder {
     /// use helpscout::{Client, Collection, HelpScoutError};
     /// use helpscout::api::users::User;
     /// use helpscout::api::teams::{self};
-    ///
+    /// 
+    /// //Ensure you have a team created in your HelpScout control panel to test this endpoint
     /// fn main() {
-    ///     let teams = list_teams().expect("get list of teams as user objects");
+    ///     let teams = list_teams().expect("return list of teams as user objects");
     ///     println!("{:#?}", teams);
     ///     assert!(teams.items.len() > 0);
     /// }
     ///
-    ///
+    /// 
     /// fn list_teams() -> Result<Collection<User>, HelpScoutError> {
     ///     let client = helpscout::Client::example();
     ///     helpscout::api::teams().list(&client)
@@ -96,7 +95,8 @@ impl TeamsBuilder {
     ///
     /// use helpscout::{Client, Item, HelpScoutError};
     /// use helpscout::api::users::User;
-    ///
+    /// 
+    /// //Ensure you have a team created in your HelpScout control panel to test this endpoint
     /// fn main() {
     ///     let team = get_team().expect("get single team member as user object");
     ///     println!("{:#?}", team);
@@ -154,6 +154,9 @@ impl TeamsBuilder {
     /// use helpscout::{Client, Collection, Item, HelpScoutError};
     /// use helpscout::api::users::User;
     ///
+    /// 
+    /// //Ensure you have a team created in your HelpScout control panel with a
+    /// //user assigned to it to test this endpoint
     /// fn main() {
     ///     let team_members = list_members().expect("get collection of users that belong to this team");
     ///     println!("{:#?}", team_members);
@@ -176,21 +179,27 @@ impl TeamsBuilder {
     /// ## Output
     ///
     /// ```rust,ignore
-    /// Item {
-    ///     item: User {
-    ///         id: 1234,
-    ///         first_name: "Designers",
-    ///         last_name: "",
-    ///         email: "",
-    ///         role: "",
-    ///         timezone: "America/New_York",
-    ///         photo_url: Some(
-    ///             "https://example.net/users/123.123.png"
-    ///         ),
-    ///         created_at: 2015-10-28T16:43:54Z,
-    ///         modified_at: 2018-01-31T19:06:48Z,
-    ///         user_type: Team
-    ///     }
+    /// Collection {
+    ///     page: 1,
+    ///     pages: 1,
+    ///     count: 8,
+    ///     items: [
+    ///         User {
+    ///             id: 1,
+    ///             first_name: "Team",
+    ///             last_name: "Member",
+    ///             email: "team@member.com",
+    ///             role: "",
+    ///             timezone: "America/New_York",
+    ///             photo_url: Some(
+    ///                 "https://example.com/users/123.1234.png"
+    ///             ),
+    ///             created_at: 2015-10-28T16:43:54Z,
+    ///             modified_at: 2018-01-31T19:06:48Z,
+    ///             user_type: User
+    ///         },
+    ///         // More
+    ///     ]
     /// }
     /// ```
     pub fn list_team_members(self, client: &Client, id: i32) -> Result<Collection<User>, HelpScoutError> {
