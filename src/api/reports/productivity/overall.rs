@@ -143,7 +143,7 @@ use duration_format::*;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProductivityReport {
-    pub filter_tags: Vec<FilterTag>,
+    pub filter_tags: Option<Vec<FilterTag>>,
     pub current: ProductivityTimeRangeStatistics,
     pub previous: Option<ProductivityTimeRangeStatistics>,
     pub delta: Option<ProductivityMultipleTimeRangeStatistics>,
