@@ -7,6 +7,7 @@ use super::ReportBuilder;
 pub mod overall;
 pub mod busy_times;
 pub mod new_conversations;
+pub mod received_messages;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct TopStatistics<T> {
@@ -62,7 +63,7 @@ pub struct BusyTimeStatistics {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct NewConversationsStatistics {
+pub struct StartCountStatistics {
     pub start: DateTime<Utc>,
     pub count: i32,
 }
