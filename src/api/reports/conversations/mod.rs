@@ -6,6 +6,7 @@ use super::ReportBuilder;
 
 pub mod overall;
 pub mod busy_times;
+pub mod new_conversations;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct TopStatistics<T> {
@@ -60,6 +61,12 @@ pub struct BusyTimeStatistics {
     pub count: i32,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct NewConversationsStatistics {
+    pub start: DateTime<Utc>,
+    pub count: i32,
+}
+
 // Optionally set this previous time range to compare against
 #[derive(Debug, Default, Serialize)]
 pub struct PreviousRange {
@@ -67,8 +74,17 @@ pub struct PreviousRange {
     pub previous_end: Option<DateTime<Utc>>,
 }
 
+#[derive(Debug, Serialize, Clone, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ConvReportViewByType {
+    Day,
+    Week,
+    Month,
+}
+
 #[serde(default)]
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ConversationsReportBuilder {
     #[serde(with = "date_format")]
     pub start: DateTime<Utc>,
@@ -81,6 +97,7 @@ pub struct ConversationsReportBuilder {
     pub folders: Option<String>,
 
     // Only some reports want these
+    pub view_by: Option<ConvReportViewByType>,
     #[serde(with = "optional_date_format")]
     pub previous_start: Option<DateTime<Utc>>,
     #[serde(with = "optional_date_format")]
@@ -89,6 +106,11 @@ pub struct ConversationsReportBuilder {
 
 impl ConversationsReportBuilder {
     /* Set methods */
+    pub fn set_view_by(mut self, view_by: ConvReportViewByType) -> Self {
+        self.view_by = Some(view_by);
+        self
+    }
+
     pub fn set_mailboxes(mut self, mailboxes: String) -> Self {
         self.mailboxes = Some(mailboxes);
         self
@@ -122,6 +144,7 @@ impl From<ReportBuilder> for ConversationsReportBuilder {
             start: report.start,
             end: report.end,
             mailboxes: None,
+            view_by: None,
             tags: None,
             types: None,
             folders: None,
