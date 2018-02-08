@@ -24,7 +24,7 @@
 //!
 //! fn overall_report() -> Result<ConversationsReport, HelpScoutError> {
 //!     let client = helpscout::Client::example();
-//!     let start = Utc::now() - Duration::days(1);
+//!     let start = Utc::now() - Duration::days(10);
 //!     let end = Utc::now();
 //!     report(start, end)
 //!         .conversations()
