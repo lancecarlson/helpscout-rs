@@ -1,6 +1,7 @@
 use serde_json;
 use chrono::{DateTime, Utc};
 
+use date_format::*;
 use error::HelpScoutError;
 use client::Client;
 use envelope::{Collection, Item};
@@ -248,8 +249,49 @@ pub struct CustomField {
     pub label: String,
 }
 
-pub fn list(client: &Client, mailbox_id: i32) -> Result<Collection<Conversation>, HelpScoutError> {
-    let res = client.get(&format!("mailboxes/{}/conversations.json", mailbox_id), ())?;
+#[derive(Debug, Default, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConversationListParamBuilder {
+    pub(crate) status: Option<String>,
+    pub(crate) tag: Option<String>,
+    #[serde(with = "optional_date_format")]
+    pub(crate) modified_since: Option<DateTime<Utc>>,
+    pub(crate) page: Option<i32>,
+}
+
+impl ConversationListParamBuilder {
+    pub fn new() -> ConversationListParamBuilder {
+        ConversationListParamBuilder {
+            status: None,
+            tag: None,
+            modified_since: None,
+            page: None,
+            .. ConversationListParamBuilder::default()
+        }
+    }
+
+    pub fn status(&mut self, status: &str) -> &mut ConversationListParamBuilder {
+        self.status = Some(status.into());
+        self
+    }
+
+    pub fn tag(&mut self, tag: &str) -> &mut ConversationListParamBuilder {
+        self.tag = Some(tag.into());
+        self
+    }
+
+    pub fn modified_since(&mut self, modified_since: DateTime<Utc>) -> &mut ConversationListParamBuilder {
+        self.modified_since = Some(modified_since);
+        self
+    }
+
+    pub fn page(&mut self, page: i32) -> &mut ConversationListParamBuilder {
+        self.page = Some(page);
+        self
+    }
+}
+pub fn list(client: &Client, mailbox_id: i32, params: &mut ConversationListParamBuilder) -> Result<Collection<Conversation>, HelpScoutError> {
+    let res = client.get(&format!("mailboxes/{}/conversations.json", mailbox_id), params)?;
     let conversations = serde_json::from_value(res.clone())?;
     Ok(conversations)
 }

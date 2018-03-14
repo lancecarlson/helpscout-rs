@@ -5,6 +5,7 @@ pub mod users;
 pub mod person;
 pub mod reports;
 pub mod teams;
+pub mod tags;
 
 use chrono::{DateTime, Utc};
 
