@@ -29,7 +29,7 @@ pub enum HelpScoutError {
     /// There was an internal server error.
     InternalServerError(Status), // 500
 
-    /// The authy service was unavailable. Only returned after the configured `retry_count`.
+    /// The helpscout service was unavailable. Only returned after the configured `retry_count`.
     ServiceUnavailable, // 503
 
     /// There was an IO error.
