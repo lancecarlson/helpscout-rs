@@ -20,7 +20,7 @@ pub enum HelpScoutError {
     /// This account does not have access to the requested service.
     Forbidden(Status), // 403
 
-    /// The authy user could not be found
+    /// The helpscout user could not be found
     UserNotFound(Status), // 404
 
     /// You have reached the API usage limit.
