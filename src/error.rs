@@ -86,7 +86,7 @@ impl fmt::Display for HelpScoutError {
             UserNotFound(ref s) => write!(f, "User Not Found: {}", s.error),
             TooManyRequests(ref s) => write!(f, "Too Many Requests: {}", s.error),
             InternalServerError(ref s) => write!(f, "Internal Server Error: {}", s.error),
-            ServiceUnavailable => write!(f, "Service Unavailable reported by authy service"),
+            ServiceUnavailable => write!(f, "Service Unavailable reported by helpscout service"),
             IoError(ref s) => write!(f, "IO Error: {}", s),
             JsonParseError(ref s) => write!(f, "Json parsing error: {}", s),
             RequestError(ref s) => write!(f, "Request error: {}", s),
