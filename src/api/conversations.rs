@@ -166,10 +166,10 @@ pub struct Attachment {
     pub id: i32,
     pub hash: String,
     pub mime_type: String,
-    pub filename: String,
-    pub size: String,
-    pub width: String,
-    pub height: String,
+    pub file_name: String,
+    pub size: i32,
+    pub width: i32,
+    pub height: i32,
     pub url: String,
 }
 
