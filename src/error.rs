@@ -20,7 +20,7 @@ pub enum HelpScoutError {
     /// This account does not have access to the requested service.
     Forbidden(Status), // 403
 
-    /// The authy user could not be found
+    /// The helpscout user could not be found
     UserNotFound(Status), // 404
 
     /// You have reached the API usage limit.
@@ -29,7 +29,7 @@ pub enum HelpScoutError {
     /// There was an internal server error.
     InternalServerError(Status), // 500
 
-    /// The authy service was unavailable. Only returned after the configured `retry_count`.
+    /// The helpscout service was unavailable. Only returned after the configured `retry_count`.
     ServiceUnavailable, // 503
 
     /// There was an IO error.
@@ -86,7 +86,7 @@ impl fmt::Display for HelpScoutError {
             UserNotFound(ref s) => write!(f, "User Not Found: {}", s.error),
             TooManyRequests(ref s) => write!(f, "Too Many Requests: {}", s.error),
             InternalServerError(ref s) => write!(f, "Internal Server Error: {}", s.error),
-            ServiceUnavailable => write!(f, "Service Unavailable reported by authy service"),
+            ServiceUnavailable => write!(f, "Service Unavailable reported by helpscout service"),
             IoError(ref s) => write!(f, "IO Error: {}", s),
             JsonParseError(ref s) => write!(f, "Json parsing error: {}", s),
             RequestError(ref s) => write!(f, "Request error: {}", s),
