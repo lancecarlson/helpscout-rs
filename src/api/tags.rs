@@ -1,4 +1,4 @@
-//! Mailbox Endpoints
+//! Tags Endpoints
 use serde_json;
 use chrono::{DateTime, Utc};
 
@@ -20,6 +20,6 @@ pub struct Tag {
 
 pub fn list(client: &Client) -> Result<Collection<Tag>, HelpScoutError> {
     let res = client.get("tags.json", ())?;
-    let mailboxes = serde_json::from_value(res.clone())?;
-    Ok(mailboxes)
+    let tags = serde_json::from_value(res.clone())?;
+    Ok(tags)
 }

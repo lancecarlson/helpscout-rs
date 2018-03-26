@@ -296,6 +296,24 @@ pub fn list(client: &Client, mailbox_id: i32, params: &mut ConversationListParam
     Ok(conversations)
 }
 
+pub fn list_by_folder(client: &Client, mailbox_id: i32, folder_id: i32, params: &mut ConversationListParamBuilder) -> Result<Collection<Conversation>, HelpScoutError> {
+    let res = client.get(&format!("mailboxes/{}/folders/{}/conversations.json", mailbox_id, folder_id), params)?;
+    let conversations = serde_json::from_value(res.clone())?;
+    Ok(conversations)
+}
+
+pub fn list_by_customer(client: &Client, mailbox_id: i32, customer_id: i32, params: &mut ConversationListParamBuilder) -> Result<Collection<Conversation>, HelpScoutError> {
+    let res = client.get(&format!("mailboxes/{}/customers/{}/conversations.json", mailbox_id, customer_id), params)?;
+    let conversations = serde_json::from_value(res.clone())?;
+    Ok(conversations)
+}
+
+pub fn list_by_user(client: &Client, mailbox_id: i32, user_id: i32, params: &mut ConversationListParamBuilder) -> Result<Collection<Conversation>, HelpScoutError> {
+    let res = client.get(&format!("mailboxes/{}/users/{}/conversations.json", mailbox_id, user_id), params)?;
+    let conversations = serde_json::from_value(res.clone())?;
+    Ok(conversations)
+}
+
 pub fn get(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutError> {
     let res = client.get(&format!("conversations/{}.json", id), ())?;
     let conversation = serde_json::from_value(res.clone())?;

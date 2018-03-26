@@ -178,10 +178,10 @@ pub struct ConversationsMultipleTimeRangeStatistics {
 pub struct ReplyStatistics {
     pub name: Option<String>,
     pub count: i64,
-    pub previous_count: i64,
+    pub previous_count: Option<i64>,
     pub percent: f64,
-    pub previous_percent: f64,
-    pub delta_percent: f64,
+    pub previous_percent: Option<f64>,
+    pub delta_percent: Option<f64>,
     pub mailbox_id: i32,
 }
 
