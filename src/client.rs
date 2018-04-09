@@ -3,7 +3,7 @@ use std::io::Read;
 use std::time::Duration;
 
 use reqwest::{self, StatusCode, Method, Url};
-use reqwest::header::{Headers, Authorization, Basic, ContentType, Location};
+use reqwest::header::{Headers, Authorization, Basic, ContentType};
 use serde;
 use serde_json::{self, Value};
 use serde_url_params;
@@ -91,7 +91,7 @@ impl Client {
     /// by the library and not the user.
     pub fn put<T>(&self, path: &str, url_params: T, body: Option<String>) -> Result<Value, HelpScoutError>
         where T: serde::Serialize
-    {   
+    {
         self.request(Method::Put, self.url(path, url_params)?, body)
     }
 
@@ -104,6 +104,7 @@ impl Client {
 
         let encoded = serde_url_params::to_string(&params)?;
         base = format!("{}?{}", base, encoded);
+        debug!("{}", base);
         Ok(Url::parse(&base)?)
     }
 
@@ -120,10 +121,10 @@ impl Client {
                 password: Some("X".into()),
             };
             headers.set(Authorization(credentials));
-            headers.set(ContentType::json()); 
+            headers.set(ContentType::json());
             let mut res = match request_body.clone() {
                 Some(b) => {
-                    debug!("Request body - {}", b);
+                    println!("Request body - {}", b);
                     self.reqwest.request(method.clone(), url).headers(headers).body(b).send()?
                 },
                 None => self.reqwest.request(method.clone(), url).headers(headers).send()?,
@@ -154,7 +155,7 @@ impl Client {
                     debug!("Response status: {}",res.status());
                     if res.status()==StatusCode::Ok||res.status()==StatusCode::Created {
                         return Ok(serde_json::Value::String("Ok".into()));
-                    }else { 
+                    } else {
                             match res.status() {
                             StatusCode::ServiceUnavailable => {
                                 count -= 1;

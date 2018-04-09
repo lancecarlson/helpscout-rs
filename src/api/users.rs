@@ -18,7 +18,7 @@ pub struct UsersBuilder {
 }
 
 impl UsersBuilder {
-    pub(crate) fn new() -> UsersBuilder {
+    pub fn new() -> UsersBuilder {
         UsersBuilder {
             page: None,
             user_type: None,

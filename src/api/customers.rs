@@ -246,7 +246,7 @@ pub struct CustomersListParamBuilder {
 }
 
 impl CustomersListParamBuilder {
-    pub(crate) fn new() -> CustomersListParamBuilder {
+    pub fn new() -> CustomersListParamBuilder {
         CustomersListParamBuilder {
             first_name: None,
             last_name: None,
@@ -401,7 +401,7 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Customer>, HelpScoutError> {
 ///
 /// fn create_customer() -> Result<Collection<Customer>, HelpScoutError> {
 ///     let client = helpscout::Client::example();
-/// 
+///
 ///     //Create unique email to run the example multiple times.
 ///     let random_email_string = format!("guh{}@example.com", Uuid::new_v4());
 ///     let customer_email = CustomerEmail::new(&random_email_string, CustomerEmailLocationType::Work);
@@ -442,7 +442,7 @@ pub fn create(first_name: &str, last_name: &str, emails: Vec<CustomerEmail>) -> 
 ///
 /// fn update_customer() -> Result<Collection<Customer>, HelpScoutError> {
 ///     let client = helpscout::Client::example();
-/// 
+///
 ///     //Pull list and get unique customer id and object to run the example.
 ///     let customers_list = helpscout::api::customers().list(&client).expect("Customers to be listed");
 ///     let customer = customers::get(&client, customers_list.items[0].id).expect("the first customer in the list be returned but with all optional params");
@@ -549,7 +549,7 @@ impl NewCustomer {
     pub fn send(&self, client: &Client) -> Result<(), HelpScoutError> {
         let body = serde_json::to_value(self)?;
         //println!("{:?}", body);
-        let res = client.post("customers.json", (), Some(body.to_string()))?;
+        client.post("customers.json", (), Some(body.to_string()))?;
         Ok(())
     }
 }
@@ -644,7 +644,7 @@ impl UpdatedCustomer {
 
     pub fn send(&self, client: &Client, id: i32) -> Result<(), HelpScoutError> {
         let body = serde_json::to_value(self)?;
-        let res = client.put(
+        client.put(
             &format!("customers/{}.json", id),
             (),
             Some(body.to_string()),

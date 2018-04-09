@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 
 use error::HelpScoutError;
 use client::Client;
-use envelope::{Collection, Item};
+use envelope::{Collection};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]

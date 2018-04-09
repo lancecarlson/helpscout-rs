@@ -320,13 +320,48 @@ pub fn get(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutErro
     Ok(conversation)
 }
 
-pub fn create(client: &Client, conversation: &NewConversation, imported: Option<bool>, auto_reply: Option<bool>, reload: Option<bool>) -> Result<(), HelpScoutError> {
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConversationCreateParamBuilder {
+    pub(crate) conversation: NewConversation,
+    pub(crate) imported: Option<bool>,
+    pub(crate) auto_reply: Option<bool>,
+    pub(crate) reload: Option<bool>,
+}
+
+impl ConversationCreateParamBuilder {
+    pub fn new(new_conversation: NewConversation) -> ConversationCreateParamBuilder {
+        ConversationCreateParamBuilder{
+            conversation: new_conversation,
+            imported: None,
+            auto_reply: None,
+            reload: None,
+        }
+    }
+
+    pub fn imported(&mut self, imported: bool) -> &mut ConversationCreateParamBuilder {
+        self.imported = Some(imported);
+        self
+    }
+
+    pub fn reload(&mut self, reload: bool) -> &mut ConversationCreateParamBuilder {
+        self.reload = Some(reload);
+        self
+    }
+
+    pub fn auto_reply(&mut self, auto_reply: bool) -> &mut ConversationCreateParamBuilder {
+        self.auto_reply = Some(auto_reply);
+        self
+    }
+}
+
+pub fn create(client: &Client, conversation: &NewConversation) -> Result<(), HelpScoutError> {
     let body = serde_json::to_value(conversation)?;
-    let res = client.post("conversations.json", (), Some(body.to_string()))?;
+    client.post("conversations.json", (), Some(body.to_string()))?;
     Ok(())
 }
 
-/*
+/* TODO: Flesh out update conversation from Conversation object
 pub fn update(client: &Client, id: i32) -> Result<Item<Conversation>, HelpScoutError> {
     let res = client.get(&format!("conversations/{}.json", id), None)?;
     let conversation = serde_json::from_value(res.clone())?;

@@ -1,4 +1,4 @@
-use ring::{digest, hmac, rand};
+use ring::{digest, hmac};
 
 pub fn validate_signature(webhook_secret_key: &str, data: &str, header_signature: &str) -> bool {
     let v_key = hmac::VerificationKey::new(&digest::SHA1, webhook_secret_key.as_ref());

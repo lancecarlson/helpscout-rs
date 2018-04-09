@@ -9,10 +9,10 @@ use api::users::User;
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct TeamsBuilder {
-    pub(crate) page: Option<i32>,
+    pub page: Option<i32>,
 }
 impl TeamsBuilder {
-    pub(crate) fn new() -> TeamsBuilder {
+    pub fn new() -> TeamsBuilder {
         TeamsBuilder {
             page: None,
             .. TeamsBuilder::default()
@@ -37,7 +37,7 @@ impl TeamsBuilder {
     /// use helpscout::{Client, Collection, HelpScoutError};
     /// use helpscout::api::users::User;
     /// use helpscout::api::teams::{self};
-    /// 
+    ///
     /// //Ensure you have a team created in your HelpScout control panel to test this endpoint
     /// fn main() {
     ///     let teams = list_teams().expect("return list of teams as user objects");
@@ -45,7 +45,7 @@ impl TeamsBuilder {
     ///     assert!(teams.items.len() > 0);
     /// }
     ///
-    /// 
+    ///
     /// fn list_teams() -> Result<Collection<User>, HelpScoutError> {
     ///     let client = helpscout::Client::example();
     ///     helpscout::api::teams().list(&client)
@@ -95,7 +95,7 @@ impl TeamsBuilder {
     ///
     /// use helpscout::{Client, Item, HelpScoutError};
     /// use helpscout::api::users::User;
-    /// 
+    ///
     /// //Ensure you have a team created in your HelpScout control panel to test this endpoint
     /// fn main() {
     ///     let team = get_team().expect("get single team member as user object");
