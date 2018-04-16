@@ -110,8 +110,8 @@ pub struct Conversation {
     pub customer: Person,
     pub thread_count: i32,
     pub status: ConversationStatus,
-    pub subject: String,
-    pub preview: String,
+    pub subject: Option<String>,
+    pub preview: Option<String>,
     pub created_by: Person,
     pub created_at: DateTime<Utc>,
     // Deprecated in favor of user_modified_at ?
