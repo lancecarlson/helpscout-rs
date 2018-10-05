@@ -124,7 +124,7 @@ impl Client {
             headers.set(ContentType::json());
             let mut res = match request_body.clone() {
                 Some(b) => {
-                    println!("Request body - {}", b);
+                    debug!("Request body - {}", b);
                     self.reqwest.request(method.clone(), url).headers(headers).body(b).send()?
                 },
                 None => self.reqwest.request(method.clone(), url).headers(headers).send()?,
@@ -133,7 +133,7 @@ impl Client {
             let mut body = String::new();
             res.read_to_string(&mut body)?;
 
-            debug!("Response body: {}", body);
+            debug!("Response body: {:#?}", body);
             debug!("Response status: {}", res.status());
             match serde_json::from_str::<Value>(&body) {
                 Ok(value) => {
@@ -148,7 +148,7 @@ impl Client {
                         StatusCode::TooManyRequests => return Err(HelpScoutError::TooManyRequests(status?)),
                         StatusCode::NotFound => return Err(HelpScoutError::UserNotFound(status?)),
                         StatusCode::InternalServerError => return Err(HelpScoutError::InternalServerError(status?)),
-                        s => panic!("Status code not covered in HelpScout REST specification: {}", s),
+                        _ => return Err(HelpScoutError::InvalidServerResponse),
                     };
                 },
                 Err(_) => {
